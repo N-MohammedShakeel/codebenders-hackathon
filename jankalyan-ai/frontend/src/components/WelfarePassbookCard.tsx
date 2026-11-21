@@ -84,7 +84,7 @@ export const WelfarePassbookCard: React.FC<WelfarePassbookCardProps> = ({ profil
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs mb-6">
           <div>
             <span className="text-slate-400 block">Beneficiary Name</span>
-            <span className="font-bold text-slate-900 text-sm">{profile.name || "Karthik"}</span>
+            <span className="font-bold text-slate-900 text-sm">{profile.name || "Citizen"}</span>
           </div>
           <div>
             <span className="text-slate-400 block">District / State</span>

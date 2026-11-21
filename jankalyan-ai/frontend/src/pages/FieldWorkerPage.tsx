@@ -119,6 +119,7 @@ export const FieldWorkerPage: React.FC = () => {
                 <td className="p-4 text-right">
                   <Link
                     to="/passbook"
+                    state={{ citizen: item }}
                     className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-900 text-white font-bold rounded-lg hover:bg-slate-800 transition"
                   >
                     <Printer className="w-3.5 h-3.5" />

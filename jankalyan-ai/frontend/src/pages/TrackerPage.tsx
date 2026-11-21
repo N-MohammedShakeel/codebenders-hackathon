@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { Clock, Send, CheckCircle2, AlertTriangle, ShieldCheck, FileCheck } from "lucide-react";
 import { useAppState } from "../context/AppStateContext";
 import { ApplicationTrackerItem } from "../types";
 
 export const TrackerPage: React.FC = () => {
   const { applications, updateApplicationStage } = useAppState();
-  const [reminderSentId, setReminderSentId] = useState<string | null>(null);
 
   const stages: Array<{ key: ApplicationTrackerItem["stage"]; label: string; color: string }> = [
     { key: "DISCOVERED", label: "1. Discovered", color: "bg-slate-100 text-slate-800" },
@@ -15,10 +14,6 @@ export const TrackerPage: React.FC = () => {
     { key: "DISBURSED", label: "5. Disbursed", color: "bg-emerald-100 text-emerald-800" },
   ];
 
-  const handleSendReminder = (id: string, schemeName: string) => {
-    setReminderSentId(id);
-    setTimeout(() => setReminderSentId(null), 3000);
-  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -33,7 +28,7 @@ export const TrackerPage: React.FC = () => {
           <Clock className="w-5 h-5 shrink-0" />
           <div>
             <span className="font-bold text-sm block">Upcoming Scheme Cutoff Alert!</span>
-            <span className="text-xs text-amber-100">Karnataka SSP Post-Matric Scholarship window closes in 40 days.</span>
+            <span className="text-xs text-amber-100">Deadlines must be confirmed on the official portal.</span>
           </div>
         </div>
         <span className="text-xs font-bold bg-white text-amber-900 px-3 py-1.5 rounded-xl shadow-xs">
@@ -82,10 +77,10 @@ export const TrackerPage: React.FC = () => {
                       </select>
 
                       <button
-                        onClick={() => handleSendReminder(app.id, app.schemeName)}
-                        className="text-[10px] text-emerald-700 hover:text-emerald-800 font-bold"
+                        disabled
+                        className="text-[10px] text-slate-400 font-bold opacity-50 cursor-not-allowed"
                       >
-                        {reminderSentId === app.id ? "Alert Sent!" : "Alert WhatsApp"}
+                        Reminder not available yet
                       </button>
                     </div>
                   </div>

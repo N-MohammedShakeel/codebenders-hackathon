@@ -26,7 +26,7 @@ export async function processIntake(text: string, language: string): Promise<{ p
   // Graceful client fallback
   const textLower = text.toLowerCase();
   const profile: CitizenProfile = {
-    name: "Karthik",
+    name: "Citizen",
     state: "Karnataka",
     district: textLower.includes("mandya") ? "Mandya" : (textLower.includes("dharwad") ? "Dharwad" : "Karnataka"),
     educationLevel: textLower.includes("puc")
@@ -42,7 +42,12 @@ export async function processIntake(text: string, language: string): Promise<{ p
     isAadhaarBankLinked: true
   };
 
-  return { profile, extractionMode: "OFFLINE_DEMO", isMock: true };
+  return {
+    profile,
+    extractionMode: "OFFLINE_DEMO",
+    isMock: true,
+    defaultedFields: ["name", "state", "district", "educationLevel", "familyAnnualIncome", "casteCategory", "landHoldingAcres", "landType", "occupation", "isAadhaarBankLinked"]
+  };
 }
 
 export async function runOrchestrator(
@@ -182,7 +187,7 @@ export async function runDocumentOCR(
 
 export async function checkTavilyUpdates(query: string, schemeId?: string) {
   try {
-    const res = await fetch(`${API_BASE}/tavily-search?query=${encodeURIComponent(query)}&schemeId=${schemeId || ""}`);
+    const res = await fetch(`${API_BASE}/tavily-search?query=${encodeURIComponent(query)}&schemeId=${encodeURIComponent(schemeId || "")}`);
     if (res.ok) return await res.json();
   } catch (e) {}
 
@@ -238,9 +243,9 @@ export async function askPolicyQuestion(question: string, schemeId?: string, lan
   } catch (e) {}
 
   return {
-    answer: "Yes, both siblings from the same family are eligible for the scholarship provided the family annual income is within ₹2.5 Lakhs. Applications must be submitted individually on the SSP portal.",
-    sources: ["SSP Karnataka Gazette 2026, Section 4.2"],
-    mode: "OFFLINE_DEMO",
+    answer: "The assistant is unavailable right now. Please confirm details on the official portal.",
+    sources: [],
+    mode: "UNAVAILABLE",
     isMock: true
   };
 }

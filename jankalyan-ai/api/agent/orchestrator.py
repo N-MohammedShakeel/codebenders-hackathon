@@ -250,8 +250,7 @@ def extract_profile_from_text(text: str, language: str = "en") -> Tuple[CitizenP
     if api_key:
         try:
             from langchain_google_genai import ChatGoogleGenerativeAI
-            from langchain.prompts import PromptTemplate
-            llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=api_key, temperature=0.1)
+            llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=api_key, temperature=0.1)
             prompt = f"""The user's text is in {_INTAKE_LANGUAGE_NAMES[language_code]} (language code: {language_code}). Extract only facts explicitly stated by the user. Return a JSON object with keys: name, state, district, educationLevel (CLASS_8_10, PUC, DIPLOMA, GRADUATE, NONE), familyAnnualIncome (number in INR), casteCategory (GENERAL, OBC, SC, ST), landHoldingAcres (number), occupation (STUDENT, FARMER, UNEMPLOYED). Use only those enum values, and do not infer missing facts.
 Text: "{text}"
 JSON:"""
@@ -261,7 +260,7 @@ JSON:"""
             if _merge_llm_profile(profile_data, llm_data) > 0:
                 return (CitizenProfile(**profile_data), "GEMINI_LANGCHAIN_EXTRACTOR")
         except Exception:
-            pass
+            logger.exception("Gemini intake extraction failed; using heuristic fallback")
 
     return (CitizenProfile(**profile_data), "HEURISTIC_FALLBACK")
 
@@ -543,7 +542,7 @@ def _gemini_policy_answer(question: str, scheme: Dict[str, Any], language: str, 
         "5. Never ask for, repeat, or store an Aadhaar number.\n"
         "Keep the answer short and plain."
     )
-    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=api_key, temperature=0.1)
+    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=api_key, temperature=0.1)
     res = llm.invoke([
         SystemMessage(content=system_prompt),
         HumanMessage(content=f"Scheme information:\n{_scheme_context(scheme)}\n\nCitizen question: {question}"),
@@ -634,7 +633,7 @@ def answer_policy_query(question: str, scheme_id: str = None, language: str = "e
                 if answer:
                     return (answer, _scheme_sources(scheme))
             except Exception:
-                pass
+                logger.exception("Gemini policy answer failed; using deterministic answer")
         return (_deterministic_scheme_answer(scheme, lang), _scheme_sources(scheme))
 
     q_lower = question.lower()

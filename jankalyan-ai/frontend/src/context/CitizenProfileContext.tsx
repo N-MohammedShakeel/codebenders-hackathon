@@ -8,7 +8,7 @@ interface CitizenProfileContextType {
 }
 
 const defaultProfile: CitizenProfile = {
-  name: "Karthik",
+  name: "",
   state: "Karnataka",
   district: "Mandya",
   educationLevel: "PUC",

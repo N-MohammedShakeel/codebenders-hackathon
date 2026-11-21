@@ -16,8 +16,9 @@ export const AdminSchemesPage: React.FC = () => {
         </div>
 
         <button
-          onClick={() => alert("New scheme modal opened (editable schema).")}
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition"
+          disabled
+          title="Editing is not available in this version"
+          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition opacity-50 cursor-not-allowed"
         >
           + Add New Scheme
         </button>
@@ -47,8 +48,9 @@ export const AdminSchemesPage: React.FC = () => {
                 <td className="p-4 text-slate-400">{s.lastVerifiedDate}</td>
                 <td className="p-4 text-right">
                   <button
-                    onClick={() => alert(`Editing rules for ${s.nameEn}`)}
-                    className="p-1.5 hover:bg-slate-100 rounded text-slate-600 mr-1"
+                    disabled
+                    title="Editing is not available in this version"
+                    className="p-1.5 hover:bg-slate-100 rounded text-slate-600 mr-1 opacity-50 cursor-not-allowed"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
