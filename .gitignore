@@ -1,0 +1,35 @@
+# Local editor/session state
+.codebenders/
+
+# Secrets and local environment files
+.env
+.env.*
+!.env.example
+jankalyan-ai/.env
+jankalyan-ai/.env.*
+!jankalyan-ai/.env.example
+
+# Local Vercel settings
+.vercel/
+
+# Frontend dependencies and generated output
+jankalyan-ai/frontend/node_modules/
+jankalyan-ai/frontend/dist/
+jankalyan-ai/frontend/.vite/
+
+# Python bytecode and virtual environments
+**/__pycache__/
+*.py[cod]
+**/.venv/
+**/venv/
+
+# Test/build caches and logs
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/coverage/
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
