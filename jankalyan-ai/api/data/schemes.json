@@ -1,0 +1,597 @@
+[
+  {
+    "id": "ka-ssp-postmatric",
+    "nameEn": "SSP Post-Matric Scholarship",
+    "nameKn": "ರಾಜ್ಯ ವಿದ್ಯಾರ್ಥಿವೇತನ ಪೋರ್ಟಲ್ (ಎಸ್‌ಎಸ್‌ಪಿ) ಮೆಟ್ರಿಕ್ ನಂತರದ ವಿದ್ಯಾರ್ಥಿವೇತನ",
+    "nameHi": "एसएसपी पोस्ट-मैट्रिक छात्रवृत्ति",
+    "department": "Social Welfare Department, Government of Karnataka",
+    "state": "Karnataka",
+    "category": "EDUCATION",
+    "lastVerifiedDate": "2026-11-15",
+    "officialPortalUrl": "https://ssp.postmatric.karnataka.gov.in",
+    "helpline": "1902",
+    "benefitSummaryEn": "Up to ₹20,000/year covering college tuition fees and monthly maintenance allowance.",
+    "benefitSummaryKn": "ಕಾಲೇಜು ಶುಲ್ಕ ಮತ್ತು ಮಾಸಿಕ ನಿರ್ವಹಣಾ ಭತ್ಯೆ ಸೇರಿದಂತೆ ವಾರ್ಷಿಕ ₹20,000 ವರೆಗೆ.",
+    "benefitSummaryHi": "कॉलेज ट्यूशन फीस और मासिक रखरखाव भत्ते के रूप में ₹20,000/वर्ष तक।",
+    "annualValueINR": 20000,
+    "deadline": "2026-12-31",
+    "rules": [
+      {
+        "field": "state",
+        "operator": "EQUALS",
+        "value": "Karnataka",
+        "descriptionEn": "Must be a resident of Karnataka",
+        "descriptionKn": "ಕರ್ನಾಟಕದ ಖಾಯಂ ನಿವಾಸಿಯಾಗಿರಬೇಕು",
+        "descriptionHi": "कर्नाटक का स्थायी निवासी होना चाहिए"
+      },
+      {
+        "field": "educationLevel",
+        "operator": "IN",
+        "value": ["PUC", "DIPLOMA", "GRADUATE", "POSTGRADUATE"],
+        "descriptionEn": "Enrolled in PUC, Diploma, or Degree course",
+        "descriptionKn": "ಪಿಯುಸಿ, ಡಿಪ್ಲೋಮಾ ಅಥವಾ ಪದವಿ ಕೋರ್ಸ್‌ಗೆ ದಾಖಲಾಗಿರಬೇಕು",
+        "descriptionHi": "पीयूसी, डिप्लोमा या डिग्री कोर्स में नामांकित होना चाहिए"
+      },
+      {
+        "field": "familyAnnualIncome",
+        "operator": "LTE",
+        "value": 250000,
+        "descriptionEn": "Annual family income must not exceed ₹2,50,000",
+        "descriptionKn": "ಕುಟುಂಬದ ವಾರ್ಷಿಕ ಆದಾಯ ₹2,50,000 ಮೀರಿರಬಾರದು",
+        "descriptionHi": "पारिवारिक वार्षिक आय ₹2,50,000 से अधिक नहीं होनी चाहिए"
+      }
+    ],
+    "requiredDocuments": [
+      {
+        "id": "income-cert",
+        "nameEn": "Income Certificate (RD Number)",
+        "nameKn": "ಆದಾಯ ಪ್ರಮಾಣಪತ್ರ (ಆರ್‌ಡಿ ಸಂಖ್ಯೆ)",
+        "nameHi": "आय प्रमाण पत्र (आरडी नंबर)",
+        "authority": "Nadakacheri / Seva Sindhu",
+        "estimatedCost": "₹40",
+        "turnaroundDays": 7,
+        "mandatory": true,
+        "howToGetUrl": "https://nadakacheri.karnataka.gov.in"
+      },
+      {
+        "id": "caste-cert",
+        "nameEn": "Caste Certificate",
+        "nameKn": "ಜಾತಿ ಪ್ರಮಾಣಪತ್ರ",
+        "nameHi": "जाति प्रमाण पत्र",
+        "authority": "Nadakacheri",
+        "estimatedCost": "₹40",
+        "turnaroundDays": 7,
+        "mandatory": false,
+        "howToGetUrl": "https://nadakacheri.karnataka.gov.in"
+      },
+      {
+        "id": "college-bonafide",
+        "nameEn": "College Admission Bonafide / Fee Receipt",
+        "nameKn": "ಕಾಲೇಜು ಪ್ರವೇಶ ರಶೀದಿ / ಬೋನಫೈಡ್",
+        "nameHi": "कॉलेज प्रवेश रसीद / बोनाफाइड",
+        "authority": "Enrolled Educational Institution",
+        "estimatedCost": "Free",
+        "turnaroundDays": 2,
+        "mandatory": true,
+        "howToGetUrl": null
+      },
+      {
+        "id": "bank-passbook",
+        "nameEn": "Bank Passbook (NPCI / Aadhaar Seeded)",
+        "nameKn": "ಬ್ಯಾಂಕ್ ಪಾಸ್‌ಬುಕ್ (ಎನ್‌ಪಿಸಿಐ ಲಿಂಕ್ ಆಗಿರಬೇಕು)",
+        "nameHi": "बैंक पासबुक (एनपीसीआई सीडेड)",
+        "authority": "Nationalized Bank",
+        "estimatedCost": "Free",
+        "turnaroundDays": 3,
+        "mandatory": true,
+        "howToGetUrl": null
+      }
+    ],
+    "applicationStepsEn": [
+      "Obtain 15-digit RD Number from Nadakacheri for your Income Certificate.",
+      "Visit ssp.postmatric.karnataka.gov.in and create a student account.",
+      "Enter your e-Attestation number provided by your college nodal officer.",
+      "Submit application and link your NPCI-seeded bank account for direct DBT transfer."
+    ],
+    "applicationStepsKn": [
+      "ನಾಡಕಚೇರಿಯಿಂದ ಆದಾಯ ಪ್ರಮಾಣಪತ್ರದ 15 ಅಂಕಿಯ ಆರ್‌ಡಿ ಸಂಖ್ಯೆ ಪಡೆಯಿರಿ.",
+      "ssp.postmatric.karnataka.gov.in ಗೆ ಭೇಟಿ ನೀಡಿ ಖಾತೆ ತೆರೆಯಿರಿ.",
+      "ಕಾಲೇಜು ನೋಡಲ್ ಅಧಿಕಾರಿಯಿಂದ ಇ-ಅಟೆಸ್ಟೇಶನ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ.",
+      "ನೇರ ಡಿಬಿಟಿ ಹಣ ವರ್ಗಾವಣೆಗಾಗಿ ಎನ್‌ಪಿಸಿಐ ಲಿಂಕ್ ಆದ ಬ್ಯಾಂಕ್ ಖಾತೆ ಜೋಡಿಸಿ."
+    ],
+    "applicationStepsHi": [
+      "नाडकचेरी से आय प्रमाण पत्र का 15 अंकों का आरडी नंबर प्राप्त करें।",
+      "ssp.postmatric.karnataka.gov.in पर जाएं और छात्र खाता बनाएं।",
+      "कॉलेज नोडल अधिकारी द्वारा प्रदान किया गया ई-सत्यापन नंबर दर्ज करें।",
+      "आवेदन जमा करें और सीधे डीबीटी के लिए बैंक खाता लिंक करें।"
+    ]
+  },
+  {
+    "id": "yuva-nidhi",
+    "nameEn": "Yuva Nidhi Scheme",
+    "nameKn": "ಯುವ ನಿಧಿ ಯೋಜನೆ",
+    "nameHi": "युवा निधि योजना",
+    "department": "Skill Development, Entrepreneurship and Livelihood Department, Karnataka",
+    "state": "Karnataka",
+    "category": "EMPLOYMENT",
+    "lastVerifiedDate": "2026-11-10",
+    "officialPortalUrl": "https://sevasindhuservices.karnataka.gov.in",
+    "helpline": "1800-425-6666",
+    "benefitSummaryEn": "₹3,000/month for unemployed degree holders and ₹1,500/month for diploma holders for up to 2 years.",
+    "benefitSummaryKn": "ನಿರುದ್ಯೋಗಿ ಪದವೀಧರರಿಗೆ ತಿಂಗಳಿಗೆ ₹3,000 ಮತ್ತು ಡಿಪ್ಲೋಮಾ ಹೊಂದಿದವರಿಗೆ ತಿಂಗಳಿಗೆ ₹1,500.",
+    "benefitSummaryHi": "बेरोजगार डिग्री धारकों को ₹3,000/माह और डिप्लोमा धारकों को ₹1,500/माह।",
+    "annualValueINR": 36000,
+    "deadline": "2026-12-31",
+    "rules": [
+      {
+        "field": "state",
+        "operator": "EQUALS",
+        "value": "Karnataka",
+        "descriptionEn": "Karnataka domicile holder",
+        "descriptionKn": "ಕರ್ನಾಟಕದ ಖಾಯಂ ನಿವಾಸಿ",
+        "descriptionHi": "कर्नाटक का निवासी"
+      },
+      {
+        "field": "educationLevel",
+        "operator": "IN",
+        "value": ["DIPLOMA", "GRADUATE", "POSTGRADUATE"],
+        "descriptionEn": "Graduate or Diploma passed out in 2023-2026",
+        "descriptionKn": "2023-2026 ರಲ್ಲಿ ಪದವಿ ಅಥವಾ ಡಿಪ್ಲೋಮಾ ಪೂರ್ಣಗೊಳಿಸಿರಬೇಕು",
+        "descriptionHi": "2023-2026 में डिग्री या डिप्लोमा उत्तीर्ण"
+      },
+      {
+        "field": "occupation",
+        "operator": "IN",
+        "value": ["UNEMPLOYED", "STUDENT"],
+        "descriptionEn": "Unemployed for at least 180 days after graduation",
+        "descriptionKn": "ಪದವಿಯ ನಂತರ ಕನಿಷ್ಠ 180 ದಿನಗಳಿಂದ ನಿರುದ್ಯೋಗಿಯಾಗಿರಬೇಕು",
+        "descriptionHi": "स्नातक के बाद कम से कम 180 दिनों से बेरोजगार"
+      }
+    ],
+    "requiredDocuments": [
+      {
+        "id": "degree-marks-card",
+        "nameEn": "Degree / Diploma Final Marks Card",
+        "nameKn": "ಪದವಿ / ಡಿಪ್ಲೋಮಾ ಅಂತಿಮ ಅಂಕಪಟ್ಟಿ",
+        "nameHi": "डिग्री / डिप्लोमा अंतिम अंकतालिका",
+        "authority": "Recognized University / DTE",
+        "estimatedCost": "Free",
+        "turnaroundDays": 1,
+        "mandatory": true,
+        "howToGetUrl": null
+      },
+      {
+        "id": "domicile-cert",
+        "nameEn": "Karnataka Domicile Certificate / Ration Card",
+        "nameKn": "ವಾಸಸ್ಥಳ ಪ್ರಮಾಣಪತ್ರ / ರೇಷನ್ ಕಾರ್ಡ್",
+        "nameHi": "मूल निवास प्रमाण पत्र / राशन कार्ड",
+        "authority": "Revenue Dept / Food & Civil Supplies",
+        "estimatedCost": "₹40",
+        "turnaroundDays": 7,
+        "mandatory": true,
+        "howToGetUrl": "https://sevasindhu.karnataka.gov.in"
+      }
+    ],
+    "applicationStepsEn": [
+      "Login to Seva Sindhu portal (sevasindhuservices.karnataka.gov.in).",
+      "Enter your University Register Number / Diploma Reg Number for auto-verification.",
+      "Declare self-unemployment status.",
+      "Submit and track monthly DBT allowance."
+    ],
+    "applicationStepsKn": [
+      "ಸೇವಾ ಸಿಂಧು ಪೋರ್ಟಲ್‌ನಲ್ಲಿ ಲಾಗಿನ್ ಮಾಡಿ.",
+      "ವಿಶ್ವವಿದ್ಯಾಲಯದ ನೋಂದಣಿ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ.",
+      "ನಿರುದ್ಯೋಗ ಸ್ವಯಂ ಘೋಷಣೆ ಸಲ್ಲಿಸಿ.",
+      "ತಿಂಗಳ ಡಿಬಿಟಿ ಸಹಾಯಧನ ಪಡೆಯಿರಿ."
+    ],
+    "applicationStepsHi": [
+      "सेवा सिंधु पोर्टल पर लॉगिन करें।",
+      "विश्वविद्यालय पंजीकरण संख्या दर्ज करें।",
+      "बेरोजगारी स्व-घोषणा जमा करें।",
+      "मासिक डीबीटी सहायता प्राप्त करें।"
+    ]
+  },
+  {
+    "id": "in-pm-kisan",
+    "nameEn": "PM-KISAN + Raitha Siri",
+    "nameKn": "ಪಿಎಂ-ಕಿಸಾನ್ + ರೈತ ಸಿರಿ ಯೋಜನೆ",
+    "nameHi": "पीएम-किसान + रैता सिरी योजना",
+    "department": "Department of Agriculture, GoI & Govt of Karnataka",
+    "state": "Karnataka",
+    "category": "AGRICULTURE",
+    "lastVerifiedDate": "2026-11-01",
+    "officialPortalUrl": "https://fruits.karnataka.gov.in",
+    "helpline": "155261 / 1800-115-526",
+    "benefitSummaryEn": "₹6,000/year central grant + ₹4,000/year Karnataka state top-up for small farmers. Eligibility criteria to be verified on the official portal.",
+    "benefitSummaryKn": "ಕೇಂದ್ರದಿಂದ ₹6,000 + ಕರ್ನಾಟಕ ಸರ್ಕಾರದಿಂದ ₹4,000 ಸೇರಿ ವಾರ್ಷಿಕ ₹10,000 ಸಹಾಯಧನ.",
+    "benefitSummaryHi": "केंद्र से ₹6,000 + कर्नाटक सरकार से ₹4,000 सहित ₹10,000/वर्ष।",
+    "annualValueINR": 10000,
+    "deadline": "2026-12-31",
+    "rules": [
+      {
+        "field": "occupation",
+        "operator": "EQUALS",
+        "value": "FARMER",
+        "descriptionEn": "Must be a farmer by occupation",
+        "descriptionKn": "ರೈತರಾಗಿರಬೇಕು",
+        "descriptionHi": "किसान होना चाहिए"
+      },
+      {
+        "field": "landHoldingAcres",
+        "operator": "GTE",
+        "value": 0.01,
+        "descriptionEn": "Must hold cultivable land in own name",
+        "descriptionKn": "ಸ್ವಂತ ಹೆಸರಿನಲ್ಲಿ ಕೃಷಿ ಭೂಮಿ ಹೊಂದಿರಬೇಕು",
+        "descriptionHi": "अपने नाम पर कृषि भूमि होनी चाहिए"
+      },
+      {
+        "field": "landHoldingAcres",
+        "operator": "LTE",
+        "value": 5.0,
+        "descriptionEn": "Cultivable landholding up to 2 hectares (5 acres)",
+        "descriptionKn": "5 ಎಕರೆ (2 ಹೆಕ್ಟೇರ್) ವರೆಗೆ ಕೃಷಿ ಭೂಮಿ ಹೊಂದಿರಬೇಕು",
+        "descriptionHi": "5 एकड़ (2 हेक्टेयर) तक कृषि भूमि होनी चाहिए"
+      },
+      {
+        "field": "landType",
+        "operator": "IN",
+        "value": ["DRYLAND", "IRRIGATED"],
+        "descriptionEn": "Land must be cultivable agricultural land",
+        "descriptionKn": "ಕೃಷಿ ಭೂಮಿಯಾಗಿರಬೇಕು (ಖುಷ್ಕಿ ಅಥವಾ ನೀರಾವರಿ)",
+        "descriptionHi": "कृषि योग्य भूमि होनी चाहिए"
+      }
+    ],
+    "requiredDocuments": [
+      {
+        "id": "fruits-id",
+        "nameEn": "FRUITS Registration FID",
+        "nameKn": "ಫ್ರೂಟ್ಸ್ ತಂತ್ರಾಂಶ ನೋಂದಣಿ ಐಡಿ (FID)",
+        "nameHi": "फ्रूट्स पोर्टल पंजीकरण आईडी",
+        "authority": "Raitha Samparka Kendra / FRUITS Portal",
+        "estimatedCost": "Free",
+        "turnaroundDays": 3,
+        "mandatory": true,
+        "howToGetUrl": "https://fruits.karnataka.gov.in"
+      },
+      {
+        "id": "land-rtc",
+        "nameEn": "Land Record (Pahani / RTC)",
+        "nameKn": "ಪಹಣಿ / ಆರ್‌ಟಿಸಿ ದಾಖಲೆ",
+        "nameHi": "भूमि रिकॉर्ड (खतौनी / आरटीसी)",
+        "authority": "Bhoomi Karnataka",
+        "estimatedCost": "₹15",
+        "turnaroundDays": 1,
+        "mandatory": true,
+        "howToGetUrl": "https://bhoomojankalyan.karnataka.gov.in"
+      }
+    ],
+    "applicationStepsEn": [
+      "Register land records on FRUITS Karnataka portal to get your FID.",
+      "Link your Aadhaar with your Land RTC at Raitha Samparka Kendra.",
+      "Verify e-KYC on pmkisan.gov.in using Aadhaar OTP.",
+      "DBT funds will disburse in 3 equal four-monthly installments of ₹2,000 each + state grant."
+    ],
+    "applicationStepsKn": [
+      "ಎಫ್‌ಐಡಿ ಪಡೆಯಲು ಫ್ರೂಟ್ಸ್ ಪೋರ್ಟಲ್‌ನಲ್ಲಿ ಭೂ ದಾಖಲೆಗಳನ್ನು ನೋಂದಾಯಿಸಿ.",
+      "ರೈತ ಸಂಪರ್ಕ ಕೇಂದ್ರದಲ್ಲಿ ಆರ್‌ಟಿಸಿಗೆ ಆಧಾರ್ ಜೋಡಿಸಿ.",
+      "pmkisan.gov.in ನಲ್ಲಿ ಇ-ಕೆವೈಸಿ ಪೂರ್ಣಗೊಳಿಸಿ.",
+      "ವರ್ಷಕ್ಕೆ 3 ಕಂತುಗಳಲ್ಲಿ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ನೇರ ಹಣ ಜಮೆ ಪಡೆಯಿರಿ."
+    ],
+    "applicationStepsHi": [
+      "एफआईडी प्राप्त करने के लिए फ्रूट्स पोर्टल पर भूमि रिकॉर्ड पंजीकृत करें।",
+      "रैता संपर्क केंद्र में आरटीसी से आधार लिंक करें।",
+      "pmkisan.gov.in पर ई-केवाईसी पूरा करें।",
+      "सीधे बैंक खाते में सहायता प्राप्त करें।"
+    ]
+  },
+  {
+    "id": "ka-ganga-kalyana",
+    "nameEn": "Ganga Kalyana Scheme",
+    "nameKn": "ಗಂಗಾ ಕಲ್ಯಾಣ ಯೋಜನೆ",
+    "nameHi": "गंगा कल्याण योजना",
+    "department": "Backward Classes & Minorities Welfare Department, Karnataka",
+    "state": "Karnataka",
+    "category": "AGRICULTURE",
+    "lastVerifiedDate": "2026-11-05",
+    "officialPortalUrl": "https://kmdc.karnataka.gov.in",
+    "helpline": "080-22864720",
+    "benefitSummaryEn": "100% subsidized free borewell drilling and pump energization up to ₹3.5 Lakhs.",
+    "benefitSummaryKn": "ಸಣ್ಣ ರೈತರಿಗೆ ₹3.5 ಲಕ್ಷದವರೆಗೆ ಉಚಿತ ಕೊಳವೆಬಾವಿ ಕೊರೆಯುವಿಕೆ ಮತ್ತು ಪಂಪ್ ಅಳವಡಿಕೆ.",
+    "benefitSummaryHi": "छोटे किसानों के लिए ₹3.5 लाख तक मुफ्त बोरवेल और पंप सेट सब्सिडी।",
+    "annualValueINR": 350000,
+    "deadline": "2026-12-15",
+    "rules": [
+      {
+        "field": "landHoldingAcres",
+        "operator": "GTE",
+        "value": 1.5,
+        "descriptionEn": "Minimum 1.5 acres of dryland agricultural land",
+        "descriptionKn": "ಕನಿಷ್ಠ 1.5 ಎಕರೆ ಒಣಭೂಮಿ ಹೊಂದಿರಬೇಕು",
+        "descriptionHi": "कम से कम 1.5 एकड़ कृषि भूमि होनी चाहिए"
+      },
+      {
+        "field": "familyAnnualIncome",
+        "operator": "LTE",
+        "value": 90000,
+        "descriptionEn": "Annual family income must not exceed ₹90,000 in rural areas",
+        "descriptionKn": "ಗ್ರಾಮೀಣ ಪ್ರದೇಶದಲ್ಲಿ ಕುಟುಂಬದ ವಾರ್ಷಿಕ ಆದಾಯ ₹90,000 ಮೀರಬಾರದು",
+        "descriptionHi": "ग्रामीण क्षेत्रों में वार्षिक आय ₹90,000 से कम होनी चाहिए"
+      }
+    ],
+    "requiredDocuments": [
+      {
+        "id": "small-farmer-cert",
+        "nameEn": "Small / Marginal Farmer Certificate",
+        "nameKn": "ಸಣ್ಣ / ಅತಿ ಸಣ್ಣ ರೈತರ ಪ್ರಮಾಣಪತ್ರ",
+        "nameHi": "लघु / सीमांत किसान प्रमाण पत्र",
+        "authority": "Tahsildar / Nadakacheri",
+        "estimatedCost": "₹40",
+        "turnaroundDays": 10,
+        "mandatory": true,
+        "howToGetUrl": null
+      }
+    ],
+    "applicationStepsEn": [
+      "Apply through Seva Sindhu or KMDC portal.",
+      "Submit land sketch and groundwater survey clearance certificate.",
+      "Department verifies physical site and sanctions drilling contract."
+    ],
+    "applicationStepsKn": [
+      "ಸೇವಾ ಸಿಂಧು ಅಥವಾ ಕೆಎಂಡಿಸಿ ಪೋರ್ಟಲ್ ಮೂಲಕ ಅರ್ಜಿ ಸಲ್ಲಿಸಿ.",
+      "ಭೂ ನಕ್ಷೆ ಮತ್ತು ಅಂತರ್ಜಲ ಸಮೀಕ್ಷಾ ವರದಿ ಸಲ್ಲಿಸಿ.",
+      "ಇಲಾಖಾ ಪರಿಶೀಲನೆಯ ನಂತರ ಕೊಳವೆಬಾವಿ ಕೊರೆಯಲು ಅನುಮೋದನೆ ದೊರೆಯುತ್ತದೆ."
+    ],
+    "applicationStepsHi": [
+      "सेवा सिंधु या केएमडीसी पोर्टल पर आवेदन करें।",
+      "भूमि का नक्शा और भूजल रिपोर्ट जमा करें।",
+      "सत्यापन के बाद बोरवेल स्वीकृत किया जाता है।"
+    ]
+  },
+  {
+    "id": "ka-gruha-lakshmi",
+    "nameEn": "Gruha Lakshmi Scheme",
+    "nameKn": "ಗೃಹಲಕ್ಷ್ಮಿ ಯೋಜನೆ",
+    "nameHi": "गृह लक्ष्मी योजना",
+    "department": "Women and Child Development Department, Karnataka",
+    "state": "Karnataka",
+    "category": "WOMEN_EMPOWERMENT",
+    "lastVerifiedDate": "2026-11-12",
+    "officialPortalUrl": "https://sevasindhu.karnataka.gov.in",
+    "helpline": "1902",
+    "benefitSummaryEn": "₹2,000 monthly financial assistance directly to the woman head of household.",
+    "benefitSummaryKn": "ಕುಟುಂಬದ ಮಹಿಳಾ ಮುಖ್ಯಸ್ಥೆಗೆ ತಿಂಗಳಿಗೆ ₹2,000 ಆರ್ಥಿಕ ನೆರವು.",
+    "benefitSummaryHi": "परिवार की महिला मुखिया को ₹2,000 प्रति माह सीधे बैंक खाते में।",
+    "annualValueINR": 24000,
+    "deadline": "2026-12-31",
+    "rules": [
+      {
+        "field": "gender",
+        "operator": "EQUALS",
+        "value": "FEMALE",
+        "descriptionEn": "Must be a female head of family",
+        "descriptionKn": "ಕುಟುಂಬದ ಮಹಿಳಾ ಯಜಮಾನಿಯಾಗಿರಬೇಕು",
+        "descriptionHi": "परिवार की महिला मुखिया होनी चाहिए"
+      }
+    ],
+    "requiredDocuments": [
+      {
+        "id": "ration-card",
+        "nameEn": "Ration Card (BPL / Antyodaya / APL)",
+        "nameKn": "ರೇಷನ್ ಕಾರ್ಡ್ (ಬಿಪಿಎಲ್ / ಅಂತ್ಯೋದಯ)",
+        "nameHi": "राशन कार्ड",
+        "authority": "Food & Civil Supplies Dept",
+        "estimatedCost": "Free",
+        "turnaroundDays": 1,
+        "mandatory": true,
+        "howToGetUrl": null
+      }
+    ],
+    "applicationStepsEn": [
+      "Visit Grama One / Bangalore One / Bapuji Seva Kendra.",
+      "Show Ration Card number where female head is designated.",
+      "Provide Aadhaar-seeded bank account for immediate direct benefit transfer."
+    ],
+    "applicationStepsKn": [
+      "ಗ್ರಾಮ ಒನ್ ಅಥವಾ ಬಾಪೂಜಿ ಸೇವಾ ಕೇಂದ್ರಕ್ಕೆ ಭೇಟಿ ನೀಡಿ.",
+      "ಮಹಿಳಾ ಮುಖ್ಯಸ್ಥೆಯ ಹೆಸರಿರುವ ರೇಷನ್ ಕಾರ್ಡ್ ನೀಡಿ.",
+      "ನೇರ ವರ್ಗಾವಣೆಗಾಗಿ ಆಧಾರ್ ಲಿಂಕ್ ಆಗಿರುವ ಬ್ಯಾಂಕ್ ಖಾತೆ ನೀಡಿ."
+    ],
+    "applicationStepsHi": [
+      "ग्राम वन या सेवा केंद्र पर जाएं।",
+      "महिला मुखिया के नाम वाला राशन कार्ड प्रस्तुत करें।",
+      "सीधे बैंक खाते में सहायता प्राप्त करें।"
+    ]
+  },
+  {
+    "id": "ap-ntr-bharosa-pension",
+    "nameEn": "NTR Bharosa Social Security Pension Scheme",
+    "nameKn": "NTR Bharosa Social Security Pension Scheme",
+    "nameHi": "NTR Bharosa Social Security Pension Scheme",
+    "department": "Government of Andhra Pradesh",
+    "state": "Andhra Pradesh",
+    "category": "SOCIAL_SECURITY",
+    "lastVerifiedDate": "2026-11-21",
+    "officialPortalUrl": "https://sspensions.ap.gov.in/SSP",
+    "helpline": "See official portal",
+    "benefitSummaryEn": "Monthly social-security pension for older adults, widows, persons with disabilities, and other listed vulnerable groups. Amounts differ by pension category and must be confirmed on the official portal.",
+    "benefitSummaryKn": "Monthly social-security pension for older adults, widows, persons with disabilities, and other listed vulnerable groups. Amounts differ by pension category and must be confirmed on the official portal.",
+    "benefitSummaryHi": "Monthly social-security pension for older adults, widows, persons with disabilities, and other listed vulnerable groups. Amounts differ by pension category and must be confirmed on the official portal.",
+    "annualValueINR": null,
+    "deadline": "See official portal for current application information",
+    "eligibilityMode": "MANUAL_REVIEW",
+    "eligibilityNoteEn": "Pension categories have distinct age, income, disability, and other criteria that are not fully represented in the profile. This entry is not used for automated eligibility decisions.",
+    "rules": [],
+    "requiredDocuments": [],
+    "applicationStepsEn": ["Check the current pension category, eligibility conditions, and application instructions on the official portal."],
+    "applicationStepsKn": ["Check the current pension category, eligibility conditions, and application instructions on the official portal."],
+    "applicationStepsHi": ["Check the current pension category, eligibility conditions, and application instructions on the official portal."]
+  },
+  {
+    "id": "kl-egrantz-education-assistance",
+    "nameEn": "Kerala e-Grantz 3.0 Educational Assistance",
+    "nameKn": "Kerala e-Grantz 3.0 Educational Assistance",
+    "nameHi": "Kerala e-Grantz 3.0 Educational Assistance",
+    "department": "Scheduled Castes, Scheduled Tribes and Backward Classes Development Departments, Government of Kerala",
+    "state": "Kerala",
+    "category": "EDUCATION",
+    "lastVerifiedDate": "2026-11-21",
+    "officialPortalUrl": "https://egrantz.kerala.gov.in/",
+    "helpline": "See official portal",
+    "benefitSummaryEn": "The e-Grantz portal administers multiple pre-matric and post-matric educational assistance schemes for eligible SC, ST and OBC students. Benefits vary by the specific scheme and course.",
+    "benefitSummaryKn": "The e-Grantz portal administers multiple pre-matric and post-matric educational assistance schemes for eligible SC, ST and OBC students. Benefits vary by the specific scheme and course.",
+    "benefitSummaryHi": "The e-Grantz portal administers multiple pre-matric and post-matric educational assistance schemes for eligible SC, ST and OBC students. Benefits vary by the specific scheme and course.",
+    "annualValueINR": null,
+    "deadline": "See the portal for current scheme-specific deadlines",
+    "eligibilityMode": "MANUAL_REVIEW",
+    "eligibilityNoteEn": "This is an umbrella application system, not one fixed scholarship. Community, course, income, institution, benefit amount, and deadlines differ by scheme and are not fully modeled here.",
+    "rules": [],
+    "requiredDocuments": [],
+    "applicationStepsEn": ["Select the applicable current scholarship on e-Grantz and follow its official eligibility and application instructions."],
+    "applicationStepsKn": ["Select the applicable current scholarship on e-Grantz and follow its official eligibility and application instructions."],
+    "applicationStepsHi": ["Select the applicable current scholarship on e-Grantz and follow its official eligibility and application instructions."]
+  },
+  {
+    "id": "tn-pudhumai-penn",
+    "nameEn": "Pudhumai Penn Higher Education Assurance Scheme",
+    "nameKn": "Pudhumai Penn Higher Education Assurance Scheme",
+    "nameHi": "Pudhumai Penn Higher Education Assurance Scheme",
+    "department": "Social Welfare and Women Empowerment Department, Government of Tamil Nadu",
+    "state": "Tamil Nadu",
+    "category": "EDUCATION",
+    "lastVerifiedDate": "2026-11-21",
+    "officialPortalUrl": "https://tnsocialwelfare.tn.gov.in/en/specilisationswomen-welfare/pudhumai-penn-scheme",
+    "helpline": "See official source",
+    "benefitSummaryEn": "The official department page describes ₹1,000 per month for eligible girls who studied Classes 6–12 in Government schools and continue their first higher-education course at a recognized institution.",
+    "benefitSummaryKn": "The official department page describes ₹1,000 per month for eligible girls who studied Classes 6–12 in Government schools and continue their first higher-education course at a recognized institution.",
+    "benefitSummaryHi": "The official department page describes ₹1,000 per month for eligible girls who studied Classes 6–12 in Government schools and continue their first higher-education course at a recognized institution.",
+    "annualValueINR": 12000,
+    "deadline": "See official source for current application information",
+    "eligibilityMode": "MANUAL_REVIEW",
+    "eligibilityNoteEn": "School history, recognized institution, and first-course continuation are required but are not captured by the profile. Eligibility is not automated.",
+    "rules": [],
+    "requiredDocuments": [],
+    "applicationStepsEn": ["Review the official department page and use the application portal linked there."],
+    "applicationStepsKn": ["Review the official department page and use the application portal linked there."],
+    "applicationStepsHi": ["Review the official department page and use the application portal linked there."]
+  },
+  {
+    "id": "tn-tamil-pudhalvan",
+    "nameEn": "Tamil Pudhalvan Scheme",
+    "nameKn": "Tamil Pudhalvan Scheme",
+    "nameHi": "Tamil Pudhalvan Scheme",
+    "department": "Social Welfare and Women Empowerment Department, Government of Tamil Nadu",
+    "state": "Tamil Nadu",
+    "category": "EDUCATION",
+    "lastVerifiedDate": "2026-11-21",
+    "officialPortalUrl": "https://tnsocialwelfare.tn.gov.in/en/specilisationswoman-welfare/tamil-pudhalvan",
+    "helpline": "See official source",
+    "benefitSummaryEn": "The official department page describes ₹1,000 per month for eligible boys who studied Classes 6–12 in Government or Government-aided Tamil-medium schools and continue their first higher-education course at a recognized institution.",
+    "benefitSummaryKn": "The official department page describes ₹1,000 per month for eligible boys who studied Classes 6–12 in Government or Government-aided Tamil-medium schools and continue their first higher-education course at a recognized institution.",
+    "benefitSummaryHi": "The official department page describes ₹1,000 per month for eligible boys who studied Classes 6–12 in Government or Government-aided Tamil-medium schools and continue their first higher-education course at a recognized institution.",
+    "annualValueINR": 12000,
+    "deadline": "See official source for current application information",
+    "eligibilityMode": "MANUAL_REVIEW",
+    "eligibilityNoteEn": "School type, Tamil-medium study, recognized institution, and first-course continuation are not captured by the profile. Eligibility is not automated.",
+    "rules": [],
+    "requiredDocuments": [],
+    "applicationStepsEn": ["Review the official department page and use the UMIS application route described there."],
+    "applicationStepsKn": ["Review the official department page and use the UMIS application route described there."],
+    "applicationStepsHi": ["Review the official department page and use the UMIS application route described there."]
+  },
+  {
+    "id": "tn-women-free-bus-travel",
+    "nameEn": "Tamil Nadu Free Travel for Women in Ordinary-Fare Buses",
+    "nameKn": "Tamil Nadu Free Travel for Women in Ordinary-Fare Buses",
+    "nameHi": "Tamil Nadu Free Travel for Women in Ordinary-Fare Buses",
+    "department": "Social Welfare and Women Empowerment Department, Government of Tamil Nadu",
+    "state": "Tamil Nadu",
+    "category": "TRANSPORT",
+    "lastVerifiedDate": "2026-11-21",
+    "officialPortalUrl": "https://tnsocialwelfare.tn.gov.in/en/specilisationswomen-welfare/free-travel-for-women-in-government-buses",
+    "helpline": "See official source",
+    "benefitSummaryEn": "The official page says women, transgender people, and girls pursuing higher education can travel free on eligible ordinary-fare city buses operated by Tamil Nadu State Transport Corporations.",
+    "benefitSummaryKn": "The official page says women, transgender people, and girls pursuing higher education can travel free on eligible ordinary-fare city buses operated by Tamil Nadu State Transport Corporations.",
+    "benefitSummaryHi": "The official page says women, transgender people, and girls pursuing higher education can travel free on eligible ordinary-fare city buses operated by Tamil Nadu State Transport Corporations.",
+    "annualValueINR": null,
+    "deadline": "No application window listed; check current route and service conditions with the operator",
+    "eligibilityMode": "MANUAL_REVIEW",
+    "eligibilityNoteEn": "Route, bus class, and passenger conditions are not fully represented in the profile. Confirm that a specific bus service is covered before travel.",
+    "rules": [],
+    "requiredDocuments": [],
+    "applicationStepsEn": ["Check eligible ordinary-fare services and current travel conditions with the transport operator."],
+    "applicationStepsKn": ["Check eligible ordinary-fare services and current travel conditions with the transport operator."],
+    "applicationStepsHi": ["Check eligible ordinary-fare services and current travel conditions with the transport operator."]
+  },
+  {
+    "id": "ts-cheyutha-aarogyasri",
+    "nameEn": "Cheyutha (Rajiv Aarogyasri) Health Coverage",
+    "nameKn": "Cheyutha (Rajiv Aarogyasri) Health Coverage",
+    "nameHi": "Cheyutha (Rajiv Aarogyasri) Health Coverage",
+    "department": "Government of Telangana",
+    "state": "Telangana",
+    "category": "HEALTHCARE",
+    "lastVerifiedDate": "2026-11-21",
+    "officialPortalUrl": "https://www.telangana.gov.in/government-initiatives/",
+    "helpline": "See official source",
+    "benefitSummaryEn": "The Telangana Government initiatives page describes free medical treatment coverage up to ₹10 lakh per family through the Rajiv Aarogyasri initiative for economically backward sections at empanelled hospitals.",
+    "benefitSummaryKn": "The Telangana Government initiatives page describes free medical treatment coverage up to ₹10 lakh per family through the Rajiv Aarogyasri initiative for economically backward sections at empanelled hospitals.",
+    "benefitSummaryHi": "The Telangana Government initiatives page describes free medical treatment coverage up to ₹10 lakh per family through the Rajiv Aarogyasri initiative for economically backward sections at empanelled hospitals.",
+    "annualValueINR": null,
+    "deadline": "See official source for current coverage and enrollment information",
+    "eligibilityMode": "MANUAL_REVIEW",
+    "eligibilityNoteEn": "This is health coverage rather than an annual cash benefit. Household and treatment eligibility are not represented in the profile; verify current coverage and hospital participation officially.",
+    "rules": [],
+    "requiredDocuments": [],
+    "applicationStepsEn": ["Check current eligibility, covered treatment packages, and empanelled hospitals using the official Government of Telangana source."],
+    "applicationStepsKn": ["Check current eligibility, covered treatment packages, and empanelled hospitals using the official Government of Telangana source."],
+    "applicationStepsHi": ["Check current eligibility, covered treatment packages, and empanelled hospitals using the official Government of Telangana source."]
+  },
+  {
+    "id": "ts-maha-lakshmi",
+    "nameEn": "Maha Lakshmi Scheme",
+    "nameKn": "Maha Lakshmi Scheme",
+    "nameHi": "Maha Lakshmi Scheme",
+    "department": "Government of Telangana",
+    "state": "Telangana",
+    "category": "WOMEN_EMPOWERMENT",
+    "lastVerifiedDate": "2026-11-21",
+    "officialPortalUrl": "https://www.telangana.gov.in/government-initiatives/",
+    "helpline": "See official source",
+    "benefitSummaryEn": "The Government of Telangana initiatives page describes ₹2,500 financial assistance for women heads of families, LPG cylinders at a stated subsidized price, and free TSRTC bus travel. Current availability and detailed terms must be verified.",
+    "benefitSummaryKn": "The Government of Telangana initiatives page describes ₹2,500 financial assistance for women heads of families, LPG cylinders at a stated subsidized price, and free TSRTC bus travel. Current availability and detailed terms must be verified.",
+    "benefitSummaryHi": "The Government of Telangana initiatives page describes ₹2,500 financial assistance for women heads of families, LPG cylinders at a stated subsidized price, and free TSRTC bus travel. Current availability and detailed terms must be verified.",
+    "annualValueINR": null,
+    "deadline": "See official source for current implementation and application information",
+    "eligibilityMode": "MANUAL_REVIEW",
+    "eligibilityNoteEn": "The source describes the scheme benefits but the current implementation status, family-head criteria, and detailed conditions are not modeled. Do not treat this entry as an eligibility result.",
+    "rules": [],
+    "requiredDocuments": [],
+    "applicationStepsEn": ["Verify current scheme status and application instructions on the official Government of Telangana source."],
+    "applicationStepsKn": ["Verify current scheme status and application instructions on the official Government of Telangana source."],
+    "applicationStepsHi": ["Verify current scheme status and application instructions on the official Government of Telangana source."]
+  },
+  {
+    "id": "ts-gruha-jyothi",
+    "nameEn": "Gruha Jyothi Scheme",
+    "nameKn": "Gruha Jyothi Scheme",
+    "nameHi": "Gruha Jyothi Scheme",
+    "department": "Government of Telangana",
+    "state": "Telangana",
+    "category": "ENERGY",
+    "lastVerifiedDate": "2026-11-21",
+    "officialPortalUrl": "https://www.telangana.gov.in/government-initiatives/",
+    "helpline": "See official source",
+    "benefitSummaryEn": "The Government of Telangana initiatives page describes zero electricity bills for eligible households consuming up to 200 units per month, with ration-card and household conditions noted on the page.",
+    "benefitSummaryKn": "The Government of Telangana initiatives page describes zero electricity bills for eligible households consuming up to 200 units per month, with ration-card and household conditions noted on the page.",
+    "benefitSummaryHi": "The Government of Telangana initiatives page describes zero electricity bills for eligible households consuming up to 200 units per month, with ration-card and household conditions noted on the page.",
+    "annualValueINR": null,
+    "deadline": "See official source for current enrollment information",
+    "eligibilityMode": "MANUAL_REVIEW",
+    "eligibilityNoteEn": "Monthly electricity use, household identity, and ration-card conditions are not captured by the profile. Eligibility is not automated.",
+    "rules": [],
+    "requiredDocuments": [],
+    "applicationStepsEn": ["Verify current household eligibility and enrollment instructions on the official Government of Telangana source."],
+    "applicationStepsKn": ["Verify current household eligibility and enrollment instructions on the official Government of Telangana source."],
+    "applicationStepsHi": ["Verify current household eligibility and enrollment instructions on the official Government of Telangana source."]
+  }
+]
