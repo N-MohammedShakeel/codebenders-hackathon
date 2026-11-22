@@ -4,7 +4,7 @@
 
 JanKalyan AI helps citizens discover Indian welfare schemes in plain language. A user can:
 
-- Start on a public landing page and continue to scheme discovery.
+- Start at the marketing landing page at `/`, then enter the application at `/discover`.
 - Speak or type a situation in English, Kannada, Hindi, Tamil, Malayalam or Telugu.
 - Select a state and run the scheme-discovery pipeline.
 - View likely matches, near-misses, and schemes needing official eligibility review.
@@ -14,6 +14,7 @@ JanKalyan AI helps citizens discover Indian welfare schemes in plain language. A
 - Mark the bank-passbook requirement ready manually without OCR or bank data storage.
 
 The app provides guidance only. It does not authenticate documents or guarantee government sanction.
+Gemini is used to find and rank schemes relevant to someone’s situation. Eligibility decisions are separate: only deterministic rules evaluate the small set of schemes with modeled rules, and most catalog entries need official eligibility review.
 
 ## 2. System architecture
 
@@ -44,17 +45,18 @@ FastAPI service
 
 | Route | Page | Responsibility |
 |---|---|---|
-| `/` | `LandingPage.tsx` | Public introduction and entry points |
-| `/discover` | `HomePage.tsx` | Intake, discovery, results and recent searches |
+| `/` | `LandingPage.tsx` | Marketing introduction with its own navbar and application entry link |
+| `/welcome` | `LandingPage.tsx` | Marketing landing-page alias |
+| `/discover` | `HomePage.tsx` | Application entry: intake, discovery, results and recent searches |
 | `/schemes` | `SchemesCatalogPage.tsx` | State and category filtering |
 | `/schemes/:id` | `SchemeDetailPage.tsx` | Scheme details and official portal |
 | `/documents` | `DocumentsPage.tsx` | Document checklist, manual readiness and OCR |
-| `/tracker` | `TrackerPage.tsx` | Application status placeholders |
+| `/tracker` | `TrackerPage.tsx` | Discovered schemes and document-readiness tracking |
 | `/passbook` | `PassbookPage.tsx` | Welfare passbook/export view |
 | `/field-worker` | `FieldWorkerPage.tsx` | Field-worker-oriented sample workflow |
-| `/admin/schemes` | `AdminSchemesPage.tsx` | Local catalogue administration view |
+| `/admin/schemes` | `AdminSchemesPage.tsx` | Disabled catalogue-administration placeholder |
 
-The frontend calls the API from `frontend/src/lib/api.ts` using relative `/api/...` URLs. Vercel routes those URLs to the API service; local Vite development proxies `/api` to `http://localhost:8000`.
+The landing page uses a separate navigation bar with a clear application-entry link. Application routes use the application navbar, whose Discover label follows the selected language. The frontend calls the API from `frontend/src/lib/api.ts` using relative `/api/...` URLs. Vercel routes those URLs to the API service and rewrites frontend paths to `index.html` for direct navigation and refresh; local Vite development proxies `/api` to `http://localhost:8000`.
 
 ## 4. Agentic discovery flow
 
@@ -112,12 +114,12 @@ Voice/text or sample
 
 Classification:
 
-- `LIKELY_ELIGIBLE`: every applicable rule passes.
-- `NEAR_MISS`: one usable rule fails and a remediation action is generated.
-- `INELIGIBLE`: ineligible with multiple failed rules.
-- `MANUAL_REVIEW`: no automated rules; missing applicant facts or incomplete eligibility conditions prevent a safe automated decision.
+- `LIKELY_ELIGIBLE`: every configured rule passes.
+- `NEAR_MISS`: one non-fatal rule fails and a remediation action is generated.
+- `INELIGIBLE`: two or more rules fail; these records are included in the near-miss response list with their `INELIGIBLE` status.
+- `MANUAL_REVIEW`: the catalog explicitly marks the scheme for manual review; it is excluded from deterministic match evaluation and returned separately.
 
-Gemini is not used to decide eligibility. Semantic similarity and Gemini reranking are not proof of eligibility.
+The current 110-entry catalog has 105 entries marked `MANUAL_REVIEW`; five entries have configured rule predicates. Gemini finds and ranks relevant candidates, but semantic similarity and Gemini ranking are not proof of eligibility.
 
 ### Step 5: OfficialWebSearch
 
@@ -130,7 +132,7 @@ Gemini is not used to decide eligibility. Semantic similarity and Gemini reranki
 - Telangana: `telangana.gov.in`, `telanganalabour.telangana.gov.in`, `tg.meeseva.telangana.gov.in`, `telanganaepass.cgg.gov.in`, `rythubandhu.telangana.gov.in`, `rythubima.telangana.gov.in`, `aarogyasri.telangana.gov.in`, `agri.telangana.gov.in`, `tsmeeseva.cgg.gov.in`, `wehyb.telangana.gov.in` and `swd.telangana.gov.in`
 - All India: official central domains such as `india.gov.in`, `gov.in`, `pib.gov.in`, `pmindia.gov.in`, `mygov.in`, `digitalindia.gov.in`, `scholarships.gov.in`, `pmkisan.gov.in`, `mofpi.gov.in`, `msme.gov.in` and `skillindia.gov.in`
 
-Tavily is restricted to those domains for a state where a domain map exists. Other states fall back to central government domains. Missing keys or search failures return an explicit unavailable/mock response; the app never fabricates government results. Web results supplement the catalogue and do not change the deterministic match classification.
+Tavily is restricted to those domains for a state where a domain map exists. Other states fall back to central government domains. Missing keys or search failures return an explicit unavailable response with an empty result list; the app never fabricates government results. The standalone search endpoint returns live results; discovery records search metadata in its trace and does not change match classification.
 
 ### Step 6: DocConcierge
 
@@ -149,7 +151,7 @@ Document evidence supplied by the browser is limited to category, validity statu
 3. Gemini 2.5 Flash extracts only generic document type, printed issue date, printed expiry date and annual income.
 4. The prompt forbids Aadhaar numbers, bank account numbers, personal names and unsupported inference.
 5. The backend compares category and printed dates and returns `CURRENT`, `EXPIRED`, `REVIEW_REQUIRED` or `TYPE_MISMATCH`.
-6. The browser saves only extracted fields and validity status in `localStorage`.
+6. The browser saves only extracted fields and validity status in `localStorage`; the uploaded image itself is not added to browser storage.
 
 OCR indicates printed evidence only; it does not authenticate a document or replace the issuing authority.
 
@@ -214,15 +216,18 @@ The repository-root `vercel.json` configures services:
 - `frontend`: root `jankalyan-ai/frontend`, Vite framework.
 - `/api/(.*)` is publicly rewritten to `api`.
 - `/(.*)` is publicly rewritten to `frontend`.
+- Production site: <https://jankalyan-ai.vercel.app/>. The `/` route opens the marketing landing page; `/discover` enters the application.
+- The frontend service rewrites client-side routes to `index.html`, so refreshing routes such as `/schemes` and `/tracker` continues to load the app.
 
 No internal service binding is required because the browser calls the API through `/api/*`. Set `GEMINI_API_KEY` and `TAVILY_API_KEY` as Vercel environment variables; do not expose them as frontend `VITE_*` variables.
 
 ## 10. Failure and privacy behavior
 
-- Gemini/OCR failure produces a fallback or a clear HTTP error.
-- Gemini embedding or reranker failure returns HTTP 503; the app does not display an unreranked candidate list.
+- Intake extraction can fall back to heuristic parsing; policy chat can use a deterministic answer.
+- Gemini embedding or relevance-ranking failure returns HTTP 503; the app does not display an unreranked candidate list. Provider failures such as quota exhaustion or authorization problems are surfaced with actionable messages.
+- OCR provider failures return HTTP 502 with provider-specific guidance where available; missing Gemini configuration returns HTTP 503.
 - Tavily failure never substitutes fabricated search results.
-- The browser also contains a local fallback for some matching when the backend is unreachable.
+- Intake, discovery and OCR do not use a client-side mock fallback when the backend is unreachable; errors are surfaced to the user.
 - OCR, chat and live search require user-provided API keys/configuration for those services.
 - CORS is currently permissive and there is no authentication or rate limiting.
 - Document evidence and the profile are browser-local; they are not stored in an application database.
@@ -230,12 +235,12 @@ No internal service binding is required because the browser calls the API throug
 
 ## 11. Testing and local development
 
-Backend tests live in `jankalyan-ai/api/tests/` and cover document upload guards, OCR validity, multilingual intake and orchestrator evidence behavior.
+Backend tests live in `jankalyan-ai/api/tests/` and cover document upload guards, OCR validity and provider errors, multilingual intake, Vercel service-root imports, vector search and orchestration evidence (27 tests).
 
 ```powershell
 cd "jankalyan-ai"
 python -m unittest discover -s api\tests -v
-python -m compileall -q api
+python -m py_compile api\agent\gemini_errors.py api\agent\ocr.py api\agent\orchestrator.py api\index.py
 
 cd frontend
 npm run build
@@ -250,3 +255,5 @@ python -m uvicorn api.index:app --port 8000
 cd frontend
 npm run dev
 ```
+
+The Vite development server runs at <http://localhost:3000/>; its `/api` proxy targets the backend on port `8000`.

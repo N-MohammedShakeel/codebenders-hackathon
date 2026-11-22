@@ -71,7 +71,7 @@ Paths in this table are relative to `jankalyan-ai/`.
 
 | Component | Folder path | Role |
 |---|---|---|
-| Frontend (React + Vite) | `frontend/` | Application opens at `/`; marketing landing page is available at `/welcome` |
+| Frontend (React + Vite) | `frontend/` | Marketing landing page at `/` has its own navbar and an entry link to the app at `/discover` |
 | API entrypoint | `api/index.py` | FastAPI routes and CORS setup |
 | API contract models | `api/models.py` | Pydantic request and response models |
 | Agent orchestrator | `api/agent/orchestrator.py` | Runs the fixed pipeline and the LLM intake and chat calls |
@@ -418,8 +418,8 @@ The dev server runs on port 3000 and proxies `/api` to port 8000.
 
 ### 4. Open the app
 
-- Application: http://localhost:3000/
-- Marketing landing page: http://localhost:3000/welcome
+- Marketing landing page: http://localhost:3000/
+- Application / scheme discovery: http://localhost:3000/discover
 - Scheme discovery: http://localhost:3000/discover
 - Scheme catalogue: http://localhost:3000/schemes
 
@@ -454,7 +454,7 @@ Deploy to Vercel using the repository-root `vercel.json`. It defines two service
 - `api`: `jankalyan-ai/api`, runtime `fastapi`
 - `frontend`: `jankalyan-ai/frontend`, runtime `vite`
 
-The top-level rewrite sends `/api/*` to the `api` service and all other paths to the `frontend` service. A frontend-service rewrite sends client-side routes (such as `/schemes` and `/tracker`) to its `index.html` so direct navigation and refresh work.
+The top-level rewrite sends `/api/*` to the `api` service and all other paths to the `frontend` service. The production homepage `/` is the marketing landing page; `/discover` enters the application. The landing page has a separate navigation bar. A frontend-service rewrite sends client-side routes (such as `/discover`, `/schemes` and `/tracker`) to its `index.html` so direct navigation and refresh work.
 
 In the Vercel project settings, add these environment variables:
 

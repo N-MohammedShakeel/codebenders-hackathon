@@ -117,7 +117,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      <section className="border-y border-slate-200 bg-white">
+      <section id="how-it-works" className="border-y border-slate-200 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid gap-8 md:grid-cols-3">
             {steps.map((step) => {

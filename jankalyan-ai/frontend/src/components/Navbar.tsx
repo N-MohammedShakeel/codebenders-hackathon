@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { useAppState } from "../context/AppStateContext";
 import type { Locale } from "../types";
-import { Globe, Users, Award, FileText, CheckCircle2, BookOpen } from "lucide-react";
+import { Globe, Users, FileText, CheckCircle2, BookOpen } from "lucide-react";
 
 export const Navbar: React.FC = () => {
   const { locale, setLocale, t } = useLanguage();
@@ -11,8 +11,7 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
 
   const navLinks = [
-    { path: "/", label: t("appTitle"), icon: Award },
-    { path: "/discover", label: "Discover", icon: Globe },
+    { path: "/discover", label: t("discoverTab"), icon: Globe },
     { path: "/schemes", label: t("schemesTab"), icon: BookOpen },
     { path: "/documents", label: t("documentsTab"), icon: FileText },
     { path: "/tracker", label: t("trackerTab"), icon: CheckCircle2 },
@@ -23,7 +22,7 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo & Brand */}
-          <Link to="/" className="flex items-center gap-2.5">
+          <Link to="/discover" className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-green-600 to-emerald-400 flex items-center justify-center text-white font-bold text-xl shadow-sm">
               JK
             </div>
