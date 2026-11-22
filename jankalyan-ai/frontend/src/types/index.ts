@@ -13,6 +13,15 @@ export interface CitizenProfile {
   landType?: "DRYLAND" | "IRRIGATED" | "NONE";
   occupation?: "STUDENT" | "FARMER" | "DAILY_WAGE" | "SELF_EMPLOYED" | "UNEMPLOYED";
   isAadhaarBankLinked?: boolean;
+  disabilityPercentage?: number;
+  hasGovernmentEmployeeInFamily?: boolean;
+  monthlySalaryINR?: number;
+  dayScholar?: boolean;
+  collegeType?: "GOVERNMENT" | "PRIVATE" | "AIDED" | "DEEMED";
+  aicteApproved?: boolean;
+  quota?: "GENERAL" | "SC" | "ST" | "OBC" | "EWS" | "MINORITY";
+  attendancePercentage?: number;
+  academicTopper?: boolean;
 }
 
 export interface RulePredicate {
@@ -77,6 +86,12 @@ export interface StoredDocumentEvidence {
   savedAt: string;
 }
 
+export interface EligibilityCriterion {
+  id: string;
+  group: string;
+  criterionEn: string;
+}
+
 export interface SchemeDefinition {
   id: string;
   nameEn: string;
@@ -90,6 +105,7 @@ export interface SchemeDefinition {
   category: string;
   lastVerifiedDate: string;
   officialPortalUrl: string;
+  sourceUrls?: string[];
   helpline: string;
   benefitSummaryEn: string;
   benefitSummaryKn: string;
@@ -101,6 +117,7 @@ export interface SchemeDefinition {
   deadline: string;
   eligibilityMode?: "AUTOMATED" | "MANUAL_REVIEW";
   eligibilityNoteEn?: string;
+  eligibilityCriteria?: EligibilityCriterion[];
   rules: RulePredicate[];
   requiredDocuments: DocumentRequirement[];
   applicationStepsEn: string[];

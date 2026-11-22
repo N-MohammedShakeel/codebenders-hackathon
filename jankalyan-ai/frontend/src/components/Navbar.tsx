@@ -12,6 +12,7 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { path: "/", label: t("appTitle"), icon: Award },
+    { path: "/discover", label: "Discover", icon: Globe },
     { path: "/schemes", label: t("schemesTab"), icon: BookOpen },
     { path: "/documents", label: t("documentsTab"), icon: FileText },
     { path: "/tracker", label: t("trackerTab"), icon: CheckCircle2 },

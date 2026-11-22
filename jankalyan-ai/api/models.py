@@ -21,6 +21,21 @@ class CitizenProfile(BaseModel):
     landType: Optional[str] = "DRYLAND"
     occupation: Optional[str] = "STUDENT"
     isAadhaarBankLinked: Optional[bool] = True
+    disabilityPercentage: Optional[float] = None
+    hasGovernmentEmployeeInFamily: Optional[bool] = None
+    monthlySalaryINR: Optional[float] = None
+    dayScholar: Optional[bool] = None
+    collegeType: Optional[str] = None
+    aicteApproved: Optional[bool] = None
+    quota: Optional[str] = None
+    attendancePercentage: Optional[float] = None
+    academicTopper: Optional[bool] = None
+
+
+class EligibilityCriterion(BaseModel):
+    id: str
+    group: str
+    criterionEn: str
 
 
 class RulePredicate(BaseModel):
@@ -49,11 +64,15 @@ class SchemeDefinition(BaseModel):
     nameEn: str
     nameKn: str
     nameHi: str
+    nameTa: Optional[str] = None
+    nameMl: Optional[str] = None
+    nameTe: Optional[str] = None
     department: str
     state: str
     category: str
     lastVerifiedDate: str
     officialPortalUrl: str
+    sourceUrls: List[str] = Field(default_factory=list)
     helpline: str
     benefitSummaryEn: str
     benefitSummaryKn: str
@@ -62,6 +81,7 @@ class SchemeDefinition(BaseModel):
     deadline: str
     eligibilityMode: Optional[Literal["AUTOMATED", "MANUAL_REVIEW"]] = None
     eligibilityNoteEn: Optional[str] = None
+    eligibilityCriteria: List[EligibilityCriterion] = Field(default_factory=list)
     rules: List[RulePredicate]
     requiredDocuments: List[DocumentRequirement]
     applicationStepsEn: List[str]

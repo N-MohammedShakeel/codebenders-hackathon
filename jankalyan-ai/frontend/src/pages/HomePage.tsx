@@ -38,9 +38,17 @@ export const HomePage: React.FC = () => {
   const [defaultedFields, setDefaultedFields] = useState<string[]>([]);
   const [discoveredState, setDiscoveredState] = useState<string>("");
   const [manualReviewSchemes, setManualReviewSchemes] = useState<SchemeDefinition[]>([]);
+  const [discoveryError, setDiscoveryError] = useState("");
 
   const handleDiscover = async (transcriptText: string, stateName: string) => {
     setIsLoading(true);
+    setDiscoveryError("");
+    setMatches([]);
+    setNearMisses([]);
+    setTrace([]);
+    setManualReviewSchemes([]);
+    setDiscoveredState("");
+    setDefaultedFields([]);
     try {
       // Step 1: Parse profile from voice/text
       const intakeRes = await processIntake(transcriptText, locale);
@@ -69,6 +77,7 @@ export const HomePage: React.FC = () => {
       });
     } catch (err) {
       console.error("Discovery error:", err);
+      setDiscoveryError(err instanceof Error ? err.message : "Scheme discovery could not be completed.");
     } finally {
       setIsLoading(false);
     }
@@ -82,10 +91,46 @@ export const HomePage: React.FC = () => {
   const stateNearMisses = nearMisses.filter((nm) => nm.scheme.state === discoveredState);
   const nationalMatches = matches.filter((m) => m.scheme.state === "All India");
   const nationalNearMisses = nearMisses.filter((nm) => nm.scheme.state === "All India");
+  const stateManualReviewSchemes = manualReviewSchemes.filter((scheme) => scheme.state === discoveredState);
+  const nationalManualReviewSchemes = manualReviewSchemes.filter((scheme) => scheme.state === "All India");
+  const hasNoAutomatedMatches =
+    stateMatches.length === 0 &&
+    stateNearMisses.length === 0 &&
+    nationalMatches.length === 0 &&
+    nationalNearMisses.length === 0;
+  const renderManualReviewCard = (scheme: SchemeDefinition) => (
+    <article key={scheme.id} className="p-5 bg-white rounded-2xl border border-amber-200 shadow-sm">
+      <span className="text-[10px] font-bold uppercase text-amber-800">
+        {scheme.state} · {scheme.category} · Review required
+      </span>
+      <h4 className="mt-2 text-sm font-bold text-slate-900">{localizedName(scheme, locale)}</h4>
+      <p className="mt-2 text-xs text-slate-600">{localizedBenefit(scheme, locale)}</p>
+      {scheme.eligibilityNoteEn && <p className="mt-2 text-xs text-amber-900">{scheme.eligibilityNoteEn}</p>}
+      <div className="mt-3 flex gap-4">
+        <Link to={`/schemes/${scheme.id}`} className="text-xs font-bold text-emerald-700 hover:underline">
+          Catalog details
+        </Link>
+        <a
+          href={scheme.officialPortalUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs font-bold text-emerald-700 hover:underline"
+        >
+          Official source
+        </a>
+      </div>
+    </article>
+  );
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Voice & Plain Language Intake Card */}
       <ConversationalIntake onDiscover={handleDiscover} isLoading={isLoading} />
+
+      {discoveryError && (
+        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          Could not complete scheme discovery: {discoveryError}
+        </div>
+      )}
 
       {hasResults && matches.length > 0 && (
         <div className="pt-4">
@@ -170,50 +215,39 @@ export const HomePage: React.FC = () => {
         </div>
       )}
 
-      {hasResults && manualReviewSchemes.length > 0 && (
+      {hasResults && stateManualReviewSchemes.length > 0 && (
         <section className="pt-4">
           <h3 className="text-base font-bold text-slate-800 mb-3">
             {discoveredState} schemes needing official eligibility review
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {manualReviewSchemes.map((scheme) => (
-              <article key={scheme.id} className="p-5 bg-white rounded-2xl border border-amber-200 shadow-sm">
-                <span className="text-[10px] font-bold uppercase text-amber-800">{scheme.category} · Review required</span>
-                <h4 className="mt-2 text-sm font-bold text-slate-900">{localizedName(scheme, locale)}</h4>
-                <p className="mt-2 text-xs text-slate-600">{localizedBenefit(scheme, locale)}</p>
-                {scheme.eligibilityNoteEn && <p className="mt-2 text-xs text-amber-900">{scheme.eligibilityNoteEn}</p>}
-                <div className="mt-3 flex gap-4">
-                  <Link to={`/schemes/${scheme.id}`} className="text-xs font-bold text-emerald-700 hover:underline">
-                    Catalog details
-                  </Link>
-                  <a
-                    href={scheme.officialPortalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs font-bold text-emerald-700 hover:underline"
-                  >
-                    Official source
-                  </a>
-                </div>
-              </article>
-            ))}
+            {stateManualReviewSchemes.map(renderManualReviewCard)}
           </div>
         </section>
       )}
 
-      {hasResults &&
-        stateMatches.length === 0 &&
-        stateNearMisses.length === 0 &&
-        nationalMatches.length === 0 &&
-        nationalNearMisses.length === 0 && (
+      {hasResults && nationalManualReviewSchemes.length > 0 && (
+        <section className="pt-4">
+          <h3 className="text-base font-bold text-slate-800 mb-3">
+            All-India schemes needing official eligibility review
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {nationalManualReviewSchemes.map(renderManualReviewCard)}
+          </div>
+        </section>
+      )}
+
+      {hasResults && hasNoAutomatedMatches && (
           <div className="p-5 bg-white rounded-2xl border border-slate-200 text-sm text-slate-700">
-            No schemes for {discoveredState} produced an automated eligibility match. This does not mean you are ineligible.
-            {manualReviewSchemes.length === 0 && " Catalog coverage is not comprehensive."}
+            No automated eligibility match was found for {discoveredState}. This does not mean you are ineligible.
+            {manualReviewSchemes.length > 0
+              ? " Potentially relevant schemes requiring official review are listed above."
+              : " No relevant schemes were identified in the current catalog."}
             <Link to="/schemes" className="ml-1 font-semibold text-emerald-700 hover:underline">
               Browse state schemes.
             </Link>
           </div>
-        )}
+      )}
 
       {discoveryHistory.length > 0 && (
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

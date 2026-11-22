@@ -31,7 +31,7 @@ from api.models import (
     DocumentOCRResponse,
     TavilySearchResponse
 )
-from api.agent.tools import load_schemes_catalog, live_tavily_search
+from api.agent.tools import load_schemes_catalog, live_tavily_search, VectorSearchError
 from api.agent.orchestrator import (
     extract_profile_from_text,
     run_orchestration_swarm,
@@ -95,8 +95,8 @@ def intake_endpoint(req: IntakeRequest):
 
 @app.post("/api/orchestrator", response_model=OrchestratorResponse)
 def orchestrator_endpoint(req: OrchestratorRequest):
-    """Coordinates the LangChain agent swarm and deterministic rule engine."""
-    profile_dict = req.profile.model_dump()
+    """Coordinates semantic retrieval, Gemini relevance ranking and deterministic rules."""
+    profile_dict = req.profile.model_dump(exclude_unset=True)
     evidence = [item.model_dump() for item in req.documentEvidence]
     income_documents = [
         item for item in evidence
@@ -114,7 +114,11 @@ def orchestrator_endpoint(req: OrchestratorRequest):
         [item.get("category") for item in evidence],
         bool(income_documents),
     )
-    matches, near_misses, trace = run_orchestration_swarm(profile_dict, evidence)
+    try:
+        matches, near_misses, trace = run_orchestration_swarm(profile_dict, evidence)
+    except VectorSearchError as exc:
+        logger.error("Scheme discovery AI unavailable: %s", exc)
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     manual_review_ids = (
         trace[1].output.get("manualReviewCandidateIds", [])
         if len(trace) > 1 and isinstance(trace[1].output, dict)

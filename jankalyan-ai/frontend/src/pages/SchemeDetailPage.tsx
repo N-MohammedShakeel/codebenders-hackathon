@@ -6,10 +6,16 @@ import { SchemeDefinition } from "../types";
 import { useLanguage } from "../context/LanguageContext";
 import { PolicyChatDrawer } from "../components/PolicyChatDrawer";
 import { localizedName, localizedBenefit, localizedSteps } from "../lib/schemeText";
+import { useAppState } from "../context/AppStateContext";
 
 export const SchemeDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { locale } = useLanguage();
+  const {
+    applications,
+    matchedSchemeIdsForDiscovery,
+    markSchemeDetailsReviewed,
+  } = useAppState();
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const scheme = (localSchemes as SchemeDefinition[]).find((s) => s.id === id);
@@ -28,6 +34,8 @@ export const SchemeDetailPage: React.FC = () => {
   const schemeName = localizedName(scheme, locale);
   const benefitSummary = localizedBenefit(scheme, locale);
   const steps = localizedSteps(scheme, locale);
+  const isDiscoveryCandidate = matchedSchemeIdsForDiscovery.includes(scheme.id);
+  const isInTracker = applications.some((application) => application.schemeId === scheme.id);
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -93,6 +101,20 @@ export const SchemeDetailPage: React.FC = () => {
             {scheme.eligibilityNoteEn || "Eligibility is not fully represented in the app. Confirm all conditions on the official source."}
           </p>
         )}
+        {scheme.eligibilityCriteria && scheme.eligibilityCriteria.length > 0 && (
+          <div className="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {scheme.eligibilityCriteria.map((criterion) => (
+              <div key={criterion.id} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+                <span className="block text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                  {criterion.group.replace("_", " ")}
+                </span>
+                <span className="mt-1 block text-xs font-semibold leading-5 text-slate-700">
+                  {criterion.criterionEn}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="divide-y divide-slate-100">
           {scheme.rules.map((r, i) => (
             <div key={i} className="py-3 flex items-start gap-3 text-xs">
@@ -110,6 +132,25 @@ export const SchemeDetailPage: React.FC = () => {
           {scheme.rules.length === 0 && (
             <p className="py-3 text-xs text-slate-500">The official source does not provide app-verified eligibility predicates for this entry.</p>
           )}
+        </div>
+      </div>
+
+      {/* Official Sources */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <h2 className="text-base font-bold text-slate-900 mb-3">Official Sources</h2>
+        <div className="flex flex-col gap-2">
+          {Array.from(new Set([...(scheme.sourceUrls || []), scheme.officialPortalUrl])).map((sourceUrl) => (
+            <a
+              key={sourceUrl}
+              href={sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 hover:text-emerald-900"
+            >
+              <ExternalLink className="w-4 h-4" />
+              {sourceUrl}
+            </a>
+          ))}
         </div>
       </div>
 
@@ -149,6 +190,30 @@ export const SchemeDetailPage: React.FC = () => {
           ))}
         </ol>
       </div>
+
+      {isDiscoveryCandidate && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-bold text-emerald-950">
+              {isInTracker ? "Added to your tracker" : "Finished reviewing this scheme?"}
+            </h2>
+            <p className="mt-1 text-xs text-emerald-900">
+              {isInTracker
+                ? "This scheme is in the Discovered or Docs Ready stage."
+                : "Confirm that you reviewed the eligibility, sources, documents and application steps."}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => markSchemeDetailsReviewed(scheme)}
+            disabled={isInTracker}
+            className="shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-5 py-3 text-xs font-bold text-white shadow-sm disabled:cursor-default disabled:bg-emerald-300"
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            {isInTracker ? "Details Reviewed" : "Mark Details Reviewed"}
+          </button>
+        </div>
+      )}
 
       {/* Policy Chat Drawer */}
       <PolicyChatDrawer schemeId={isChatOpen ? scheme.id : null} onClose={() => setIsChatOpen(false)} />

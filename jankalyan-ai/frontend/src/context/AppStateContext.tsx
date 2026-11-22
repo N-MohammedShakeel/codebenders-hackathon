@@ -5,7 +5,9 @@ import {
   ApplicationTrackerItem,
   StoredDocumentEvidence,
   DiscoveryHistoryEntry,
+  SchemeDefinition,
 } from "../types";
+import localSchemes from "../data/schemes.json";
 
 interface AppStateContextType {
   matches: EligibilityMatchResult[];
@@ -24,32 +26,15 @@ interface AppStateContextType {
   discoveryHistory: DiscoveryHistoryEntry[];
   recordDiscovery: (entry: Omit<DiscoveryHistoryEntry, "id" | "searchedAt">) => void;
   clearDiscoveryHistory: () => void;
+  matchedSchemeIdsForDiscovery: string[];
+  markSchemeDetailsReviewed: (scheme: SchemeDefinition) => void;
   isFieldWorkerMode: boolean;
   toggleFieldWorkerMode: () => void;
   isOffline: boolean;
 }
 
-const defaultApplications: ApplicationTrackerItem[] = [
-  {
-    id: "app-1",
-    schemeId: "ka-ssp-postmatric",
-    schemeName: "SSP Post-Matric Scholarship",
-    stage: "DOCS_READY",
-    deadline: "2026-12-31",
-    appliedDate: "2026-11-18",
-    referenceNumber: "SSP2026-KA-481920",
-    notes: "Income certificate verified with Nadakacheri RD number."
-  },
-  {
-    id: "app-2",
-    schemeId: "in-pm-kisan",
-    schemeName: "PM-KISAN + Raitha Siri",
-    stage: "APPLIED",
-    deadline: "2026-12-31",
-    appliedDate: "2026-11-12",
-    referenceNumber: "FRUITS-FID-98214"
-  }
-];
+const APPLICATIONS_KEY = "jankalyan_apps";
+const MATCHED_SCHEMES_KEY = "jankalyan_discovery_matched_scheme_ids";
 
 const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
 
@@ -88,13 +73,36 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isFieldWorkerMode, setIsFieldWorkerMode] = useState<boolean>(false);
   const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
   const [discoveryHistory, setDiscoveryHistory] = useState<DiscoveryHistoryEntry[]>(loadDiscoveryHistory);
+  const [matchedSchemeIdsForDiscovery, setMatchedSchemeIdsForDiscovery] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem(MATCHED_SCHEMES_KEY);
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
+    } catch (error) {
+      console.warn("Could not load discovery matches from this browser.", error);
+      return [];
+    }
+  });
 
   const [applications, setApplications] = useState<ApplicationTrackerItem[]>(() => {
     try {
-      const saved = localStorage.getItem("jankalyan_apps");
-      return saved ? JSON.parse(saved) : defaultApplications;
+      const saved = localStorage.getItem(APPLICATIONS_KEY);
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      if (!Array.isArray(parsed)) return [];
+      const cleaned = parsed.filter(
+        (application): application is ApplicationTrackerItem =>
+          application &&
+          typeof application === "object" &&
+          application.id !== "app-1" &&
+          application.id !== "app-2",
+      );
+      if (cleaned.length !== parsed.length) {
+        localStorage.setItem(APPLICATIONS_KEY, JSON.stringify(cleaned));
+      }
+      return cleaned;
     } catch (e) {
-      return defaultApplications;
+      return [];
     }
   });
 
@@ -137,7 +145,62 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const updateApplicationStage = (id: string, stage: ApplicationTrackerItem["stage"]) => {
     setApplications((prev) => {
       const updated = prev.map((a) => (a.id === id ? { ...a, stage } : a));
-      localStorage.setItem("jankalyan_apps", JSON.stringify(updated));
+      localStorage.setItem(APPLICATIONS_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const recalculateDocumentReadiness = (currentCheckedDocs: Record<string, boolean>) => {
+    setApplications((previous) => {
+      const updated = previous.map((application) => {
+        if (application.stage !== "DISCOVERED" && application.stage !== "DOCS_READY") {
+          return application;
+        }
+        const scheme = (localSchemes as SchemeDefinition[]).find(
+          (item) => item.id === application.schemeId,
+        );
+        if (!scheme) return application;
+
+        const requiredDocuments = scheme.requiredDocuments || [];
+        const mandatoryDocuments = requiredDocuments.filter((document) => document.mandatory !== false);
+        const documentsToCheck = mandatoryDocuments.length > 0 ? mandatoryDocuments : requiredDocuments;
+        const documentsReady = documentsToCheck.length > 0 &&
+          documentsToCheck.every((document) => !!currentCheckedDocs[document.id]);
+        const nextStage: ApplicationTrackerItem["stage"] =
+          documentsReady ? "DOCS_READY" : "DISCOVERED";
+
+        return {
+          ...application,
+          stage: nextStage,
+        };
+      });
+      localStorage.setItem(APPLICATIONS_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const markSchemeDetailsReviewed = (scheme: SchemeDefinition) => {
+    if (!matchedSchemeIdsForDiscovery.includes(scheme.id)) return;
+    setApplications((previous) => {
+      if (previous.some((application) => application.schemeId === scheme.id)) {
+        return previous;
+      }
+      const requiredDocuments = scheme.requiredDocuments || [];
+      const mandatoryDocuments = requiredDocuments.filter((document) => document.mandatory !== false);
+      const documentsToCheck = mandatoryDocuments.length > 0 ? mandatoryDocuments : requiredDocuments;
+      const documentsReady = documentsToCheck.length > 0 &&
+        documentsToCheck.every((document) => !!checkedDocs[document.id]);
+      const initialStage: ApplicationTrackerItem["stage"] =
+        documentsReady ? "DOCS_READY" : "DISCOVERED";
+      const newApplication: ApplicationTrackerItem = {
+        id: `discovered-${scheme.id}`,
+        schemeId: scheme.id,
+        schemeName: scheme.nameEn,
+        stage: initialStage,
+        deadline: scheme.deadline || "Check official portal",
+      };
+      const updated = [...previous, newApplication];
+      localStorage.setItem(APPLICATIONS_KEY, JSON.stringify(updated));
       return updated;
     });
   };
@@ -152,6 +215,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setCheckedDocs(remainingChecks);
     localStorage.setItem("jankalyan_document_evidence", JSON.stringify(remainingEvidence));
     localStorage.setItem("jankalyan_docs", JSON.stringify(remainingChecks));
+    recalculateDocumentReadiness(remainingChecks);
   };
 
   const toggleBankPassbookReadiness = () => {
@@ -165,6 +229,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setDocumentEvidence(updatedEvidence);
     localStorage.setItem("jankalyan_docs", JSON.stringify(updatedChecks));
     localStorage.setItem("jankalyan_document_evidence", JSON.stringify(updatedEvidence));
+    recalculateDocumentReadiness(updatedChecks);
   };
 
   const saveDocumentEvidence = (evidence: StoredDocumentEvidence) => {
@@ -174,9 +239,21 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setCheckedDocs(updatedChecks);
     localStorage.setItem("jankalyan_document_evidence", JSON.stringify(updatedEvidence));
     localStorage.setItem("jankalyan_docs", JSON.stringify(updatedChecks));
+    recalculateDocumentReadiness(updatedChecks);
   };
 
   const recordDiscovery = (entry: Omit<DiscoveryHistoryEntry, "id" | "searchedAt">) => {
+    const candidateIds = Array.from(new Set([
+      ...entry.matchedSchemeIds,
+      ...entry.nearMissSchemeIds,
+      ...entry.manualReviewSchemeIds,
+    ]));
+    setMatchedSchemeIdsForDiscovery(candidateIds);
+    try {
+      localStorage.setItem(MATCHED_SCHEMES_KEY, JSON.stringify(candidateIds));
+    } catch (error) {
+      console.error("Could not save discovery matches in this browser.", error);
+    }
     const next = [{
       ...entry,
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -222,6 +299,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         discoveryHistory,
         recordDiscovery,
         clearDiscoveryHistory,
+        matchedSchemeIdsForDiscovery,
+        markSchemeDetailsReviewed,
         isFieldWorkerMode,
         toggleFieldWorkerMode,
         isOffline

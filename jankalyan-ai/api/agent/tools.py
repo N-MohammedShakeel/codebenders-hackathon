@@ -1,26 +1,135 @@
 """LangChain & Deterministic Rule Engine Tools for JanKalyan AI."""
 
 import json
+import hashlib
 import logging
 import math
 import os
-import re
+import threading
 from datetime import datetime
-from collections import Counter
 from typing import List, Dict, Any, Tuple, Optional
 from pathlib import Path
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
 # Load schemes data safely
 SCHEMES_FILE = Path(__file__).parent.parent / "data" / "schemes.json"
+VECTOR_EMBEDDING_MODEL = "models/gemini-embedding-001"
+_EMBEDDING_BATCH_SIZE = 64
+_VECTOR_TOP_K = 12
+_VECTOR_MIN_SCORE = 0.30
+_SCHEME_EMBEDDINGS: Dict[str, List[float]] = {}
+_SCHEME_EMBEDDINGS_LOCK = threading.RLock()
+_ALL_INDIA_OFFICIAL_DOMAINS = [
+    "india.gov.in",
+    "gov.in",
+    "pib.gov.in",
+    "pmindia.gov.in",
+    "mygov.in",
+    "digitalindia.gov.in",
+    "scholarships.gov.in",
+    "pmkisan.gov.in",
+    "mofpi.gov.in",
+    "msme.gov.in",
+    "skillindia.gov.in",
+]
+
 _STATE_OFFICIAL_DOMAINS = {
-    "Andhra Pradesh": ["ap.gov.in"],
-    "Karnataka": ["karnataka.gov.in"],
-    "Kerala": ["kerala.gov.in"],
-    "Tamil Nadu": ["tn.gov.in", "tnsocialwelfare.tn.gov.in"],
-    "Telangana": ["telangana.gov.in"],
+    "Andhra Pradesh": [
+        "ap.gov.in",
+        "sspensions.ap.gov.in",
+        "navasakam.ap.gov.in",
+        "gsws-nbm.ap.gov.in",
+        "jnanabhumi.ap.gov.in",
+        "apagrisnet.gov.in",
+        "cse.ap.gov.in",
+        "apcfss.in",
+        "apmsidc.in",
+        "apeprocurement.gov.in",
+    ],
+    "Karnataka": [
+        "karnataka.gov.in",
+        "sevasindhuservices.karnataka.gov.in",
+        "ssp.postmatric.karnataka.gov.in",
+        "bcwd.karnataka.gov.in",
+        "sw.karnataka.gov.in",
+        "fruits.karnataka.gov.in",
+        "kmdc.karnataka.gov.in",
+        "fisheries.karnataka.gov.in",
+        "ashraya.karnataka.gov.in",
+        "raitamitra.karnataka.gov.in",
+        "kcdf.karnataka.gov.in",
+    ],
+    "Kerala": [
+        "kerala.gov.in",
+        "egrantz.kerala.gov.in",
+        "sjd.kerala.gov.in",
+        "sha.kerala.gov.in",
+        "ksywb.kerala.gov.in",
+        "highereducation.kerala.gov.in",
+        "fisheries.kerala.gov.in",
+        "lsgkerala.gov.in",
+        "keralaagriculture.gov.in",
+        "kudumbashree.org",
+    ],
+    "Tamil Nadu": [
+        "tn.gov.in",
+        "tnsocialwelfare.tn.gov.in",
+        "tnhealth.tn.gov.in",
+        "tneaonline.org",
+        "tndipr.gov.in",
+        "tnscholarships.gov.in",
+        "tnstc.in",
+        "fisheries.tn.gov.in",
+        "agri.tn.gov.in",
+        "cmchistn.com",
+        "ruraldevelopment.tn.gov.in",
+    ],
+    "Telangana": [
+        "telangana.gov.in",
+        "telanganalabour.telangana.gov.in",
+        "tg.meeseva.telangana.gov.in",
+        "telanganaepass.cgg.gov.in",
+        "rythubandhu.telangana.gov.in",
+        "rythubima.telangana.gov.in",
+        "aarogyasri.telangana.gov.in",
+        "agri.telangana.gov.in",
+        "tsmeeseva.cgg.gov.in",
+        "wehyb.telangana.gov.in",
+        "swd.telangana.gov.in",
+    ],
 }
+
+
+def get_official_search_domains(
+    state: Optional[str] = None,
+    scheme_id: Optional[str] = None,
+) -> List[str]:
+    """Returns the public official-domain allowlist for a selected state."""
+    state_domains = _STATE_OFFICIAL_DOMAINS.get(state or "", [])
+    domains: List[str]
+    if state:
+        domains = list(dict.fromkeys([*state_domains, *_ALL_INDIA_OFFICIAL_DOMAINS]))
+    else:
+        domains = list(_ALL_INDIA_OFFICIAL_DOMAINS)
+    if scheme_id:
+        scheme = next(
+            (item for item in load_schemes_catalog() if item.get("id") == scheme_id),
+            None,
+        )
+        if scheme:
+            source_urls = [
+                *(scheme.get("sourceUrls") or []),
+                scheme.get("officialPortalUrl"),
+            ]
+            for source_url in source_urls:
+                if not isinstance(source_url, str):
+                    continue
+                parsed = urlparse(source_url)
+                if parsed.scheme == "https" and parsed.hostname:
+                    domains.append(parsed.hostname.lower())
+    return list(dict.fromkeys(domains))
 
 
 def load_schemes_catalog() -> List[Dict[str, Any]]:
@@ -38,72 +147,204 @@ def load_schemes_catalog() -> List[Dict[str, Any]]:
     return data
 
 
-def _tokenize(text: Any) -> List[str]:
-    """Lowercase and split on anything that is not a letter or digit."""
-    return re.findall(r"[^\W_]+", str(text).lower())
-
-
-def _cosine(a: Counter, b: Counter) -> float:
-    """Cosine similarity between two term-frequency vectors."""
-    if not a or not b:
-        return 0.0
-    dot = sum(count * b.get(term, 0) for term, count in a.items())
-    norm_a = math.sqrt(sum(v * v for v in a.values()))
-    norm_b = math.sqrt(sum(v * v for v in b.values()))
-    if norm_a == 0 or norm_b == 0:
-        return 0.0
-    return dot / (norm_a * norm_b)
-
-
 def _scheme_text(s: Dict[str, Any]) -> str:
-    """English text of a scheme used for vector search."""
+    """Multilingual scheme text used to build its semantic-search embedding."""
     parts = [
         s.get("nameEn", ""),
+        s.get("nameKn", ""),
+        s.get("nameHi", ""),
         s.get("department", ""),
+        s.get("state", ""),
         s.get("category", ""),
         s.get("benefitSummaryEn", ""),
+        s.get("benefitSummaryKn", ""),
+        s.get("benefitSummaryHi", ""),
+        s.get("eligibilityNoteEn", ""),
     ]
+    for criterion in s.get("eligibilityCriteria", []) or []:
+        if isinstance(criterion, dict):
+            parts.append(criterion.get("criterionEn", ""))
     for r in s.get("rules", []) or []:
         if isinstance(r, dict):
             parts.append(r.get("descriptionEn", ""))
+    for document in s.get("requiredDocuments", []) or []:
+        if isinstance(document, dict):
+            parts.append(document.get("nameEn", ""))
     return " ".join(str(p) for p in parts if p)
 
 
-_SEARCH_STOPWORDS = frozenset({
-    "for", "the", "a", "an", "of", "to", "my", "i", "am", "do",
-    "need", "what", "is", "in", "and", "with", "on",
-})
-_NAME_FIELD_WEIGHT = 3  # extra weight multiplier for tokens in nameEn and category
+class VectorSearchError(RuntimeError):
+    """Raised when semantic retrieval cannot be completed."""
 
 
-def _content_tokens(text: Any) -> List[str]:
-    """Tokens with common stopwords removed (falls back to all tokens if none remain)."""
-    tokens = _tokenize(text)
-    kept = [t for t in tokens if t not in _SEARCH_STOPWORDS]
-    return kept or tokens
+def _get_embedding_client():
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise VectorSearchError("Gemini embeddings are not configured.")
+    try:
+        from langchain_google_genai import GoogleGenerativeAIEmbeddings
+    except ImportError as exc:
+        logger.error("Gemini embedding dependency is unavailable (%s).", type(exc).__name__)
+        raise VectorSearchError("Gemini embeddings are unavailable.") from None
+    return GoogleGenerativeAIEmbeddings(
+        model=VECTOR_EMBEDDING_MODEL,
+        google_api_key=api_key,
+    )
 
 
-def search_in_memory_schemes(query: str) -> List[Dict[str, Any]]:
-    """In-memory bag-of-words term-frequency cosine similarity over the schemes catalog.
+def _embedding_key(scheme: Dict[str, Any], text: str) -> str:
+    value = f"{scheme.get('id', '')}\0{text}".encode("utf-8")
+    return hashlib.sha256(value).hexdigest()
 
-    Tokens from nameEn and category count _NAME_FIELD_WEIGHT times; other fields count once.
-    """
+
+def _verbose_agent_trace_enabled() -> bool:
+    return os.getenv("AGENT_TRACE_VERBOSE", "").strip().lower() in {"1", "true", "yes"}
+
+
+def _valid_embedding(vector: Any) -> bool:
+    return (
+        isinstance(vector, list)
+        and bool(vector)
+        and all(isinstance(value, (int, float)) and math.isfinite(value) for value in vector)
+    )
+
+
+def _cosine_similarity(left: List[float], right: List[float]) -> float:
+    if len(left) != len(right):
+        raise VectorSearchError("Gemini returned embeddings with inconsistent dimensions.")
+    dot = sum(a * b for a, b in zip(left, right))
+    norm_left = math.sqrt(sum(value * value for value in left))
+    norm_right = math.sqrt(sum(value * value for value in right))
+    if not norm_left or not norm_right:
+        return 0.0
+    return dot / (norm_left * norm_right)
+
+
+def _populate_scheme_embedding_cache(
+    client: Any,
+    schemes: List[Dict[str, Any]],
+    texts: List[str],
+) -> List[Tuple[Dict[str, Any], str]]:
+    entries = [
+        (scheme, text, _embedding_key(scheme, text))
+        for scheme, text in zip(schemes, texts)
+    ]
+    missing = [entry for entry in entries if entry[2] not in _SCHEME_EMBEDDINGS]
+    logger.info(
+        "Gemini embedding index: model=%s scoped_scheme_count=%d cache_miss_count=%d",
+        VECTOR_EMBEDDING_MODEL,
+        len(entries),
+        len(missing),
+    )
+    for start in range(0, len(missing), _EMBEDDING_BATCH_SIZE):
+        batch = missing[start : start + _EMBEDDING_BATCH_SIZE]
+        if _verbose_agent_trace_enabled():
+            logger.info(
+                "GeminiEmbeddingDocuments input=%s",
+                json.dumps(
+                    [{"schemeId": entry[0].get("id"), "text": entry[1]} for entry in batch],
+                    ensure_ascii=False,
+                ),
+            )
+        try:
+            vectors = client.embed_documents([entry[1] for entry in batch])
+        except Exception as exc:
+            logger.error(
+                "Gemini scheme embedding request failed (%s); provider details omitted.",
+                type(exc).__name__,
+            )
+            raise VectorSearchError("Gemini scheme embeddings could not be generated.") from None
+        if len(vectors) != len(batch) or not all(_valid_embedding(vector) for vector in vectors):
+            logger.error("Gemini returned an invalid scheme-embedding batch.")
+            raise VectorSearchError("Gemini returned invalid scheme embeddings.")
+        for (_, _, key), vector in zip(batch, vectors):
+            _SCHEME_EMBEDDINGS[key] = [float(value) for value in vector]
+        logger.info(
+            "GeminiEmbeddingDocuments response: item_count=%d dimensions=%d",
+            len(vectors),
+            len(vectors[0]) if vectors else 0,
+        )
+    return [(scheme, key) for scheme, _, key in entries]
+
+
+def search_in_memory_schemes(
+    query: str,
+    state: Optional[str] = None,
+    top_k: int = _VECTOR_TOP_K,
+    min_score: float = _VECTOR_MIN_SCORE,
+) -> List[Dict[str, Any]]:
+    """Rank state-scoped schemes with Gemini embeddings and cosine similarity."""
+    if not query.strip():
+        logger.info("Semantic vector search skipped: no profile search intent was available.")
+        return []
     catalog = load_schemes_catalog()
-    if not query:
-        return catalog
+    scoped_schemes = [
+        scheme for scheme in catalog
+        if state is None or scheme.get("state") in (state, "All India")
+    ]
+    if not scoped_schemes:
+        logger.info("Semantic vector search found no schemes for state=%s.", state)
+        return []
 
-    query_vec = Counter(_content_tokens(query))
+    texts = [_scheme_text(scheme) for scheme in scoped_schemes]
+    logger.info(
+        "Semantic vector search request: model=%s state=%s query=%r scoped_scheme_count=%d",
+        VECTOR_EMBEDDING_MODEL,
+        state,
+        query,
+        len(scoped_schemes),
+    )
+    with _SCHEME_EMBEDDINGS_LOCK:
+        try:
+            client = _get_embedding_client()
+        except VectorSearchError:
+            raise
+        except Exception as exc:
+            logger.error(
+                "Gemini embedding client initialization failed (%s); provider details omitted.",
+                type(exc).__name__,
+            )
+            raise VectorSearchError("Gemini embedding client could not be initialized.") from None
+        entries = _populate_scheme_embedding_cache(client, scoped_schemes, texts)
+        try:
+            query_vector = client.embed_query(query)
+        except Exception as exc:
+            logger.error(
+                "Gemini query embedding failed (%s); provider details omitted.",
+                type(exc).__name__,
+            )
+            raise VectorSearchError("Gemini query embedding could not be generated.") from None
+        if not _valid_embedding(query_vector):
+            logger.error("Gemini returned an invalid query embedding.")
+            raise VectorSearchError("Gemini returned an invalid query embedding.")
+        logger.info(
+            "GeminiEmbeddingQuery response: dimensions=%d",
+            len(query_vector),
+        )
 
-    scored = []
-    for s in catalog:
-        doc_vec = Counter(_content_tokens(_scheme_text(s)))
-        name_tokens = Counter(_content_tokens(f"{s.get('nameEn', '')} {s.get('category', '')}"))
-        for term, count in name_tokens.items():
-            doc_vec[term] += (_NAME_FIELD_WEIGHT - 1) * count
-        scored.append((_cosine(query_vec, doc_vec), s))
+        scored = [
+            (
+                _cosine_similarity(query_vector, _SCHEME_EMBEDDINGS[key]),
+                scheme,
+            )
+            for scheme, key in entries
+        ]
 
-    scored.sort(key=lambda x: x[0], reverse=True)
-    return [{**item[1], "score": round(item[0], 3)} for item in scored]
+    scored.sort(key=lambda item: item[0], reverse=True)
+    results = [
+        {**scheme, "score": round(score, 4)}
+        for score, scheme in scored
+        if score >= min_score
+    ][: max(1, min(top_k, 30))]
+    logger.info(
+        "Semantic vector search result: state=%s minimum_score=%.2f top_k=%d result_count=%d candidates=%s",
+        state,
+        min_score,
+        top_k,
+        len(results),
+        [{"id": scheme.get("id"), "score": scheme["score"]} for scheme in results],
+    )
+    return results
 
 
 
@@ -248,7 +489,7 @@ def live_tavily_search(
     state: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Search official portals for the selected state; never fabricate fallback results."""
-    domains = _STATE_OFFICIAL_DOMAINS.get(state or "", ["india.gov.in", "pib.gov.in"])
+    domains = get_official_search_domains(state, scheme_id)
     api_key = os.getenv("TAVILY_API_KEY")
     if not api_key:
         logger.warning("Live scheme search skipped: TAVILY_API_KEY is not configured (state=%s)", state)

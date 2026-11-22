@@ -7,6 +7,7 @@ import { Navbar } from "./components/Navbar";
 import { OfflineBanner } from "./components/OfflineBanner";
 
 import HomePage from "./pages/HomePage";
+import LandingPage from "./pages/LandingPage";
 import SchemesCatalogPage from "./pages/SchemesCatalogPage";
 import SchemeDetailPage from "./pages/SchemeDetailPage";
 import DocumentsPage from "./pages/DocumentsPage";
@@ -26,7 +27,8 @@ export default function App() {
               <Navbar />
               <main className="flex-1">
                 <Routes>
-                  <Route path="/" element={<HomePage />} />
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/discover" element={<HomePage />} />
                   <Route path="/schemes" element={<SchemesCatalogPage />} />
                   <Route path="/schemes/:id" element={<SchemeDetailPage />} />
                   <Route path="/documents" element={<DocumentsPage />} />

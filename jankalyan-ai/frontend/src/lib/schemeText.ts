@@ -17,12 +17,21 @@ export type SchemeTextFields = {
   nameEn: string;
   nameKn: string;
   nameHi: string;
+  nameTa?: string;
+  nameMl?: string;
+  nameTe?: string;
   benefitSummaryEn: string;
   benefitSummaryKn: string;
   benefitSummaryHi: string;
+  benefitSummaryTa?: string;
+  benefitSummaryMl?: string;
+  benefitSummaryTe?: string;
   applicationStepsEn: string[];
   applicationStepsKn: string[];
   applicationStepsHi: string[];
+  applicationStepsTa?: string[];
+  applicationStepsMl?: string[];
+  applicationStepsTe?: string[];
 };
 
 function translationFor(schemeId: string, locale: Locale): Translation | undefined {
@@ -33,6 +42,15 @@ function translationFor(schemeId: string, locale: Locale): Translation | undefin
 }
 
 export function localizedName(scheme: SchemeTextFields, locale: Locale): string {
+  const directTranslation = locale === "ta"
+    ? scheme.nameTa
+    : locale === "ml"
+      ? scheme.nameMl
+      : locale === "te"
+        ? scheme.nameTe
+        : undefined;
+  if (directTranslation) return directTranslation;
+
   const t = translationFor(scheme.id, locale);
   if (t?.name) return t.name;
   if (locale === "kn") return scheme.nameKn;
@@ -41,6 +59,15 @@ export function localizedName(scheme: SchemeTextFields, locale: Locale): string 
 }
 
 export function localizedBenefit(scheme: SchemeTextFields, locale: Locale): string {
+  const directTranslation = locale === "ta"
+    ? scheme.benefitSummaryTa
+    : locale === "ml"
+      ? scheme.benefitSummaryMl
+      : locale === "te"
+        ? scheme.benefitSummaryTe
+        : undefined;
+  if (directTranslation) return directTranslation;
+
   const t = translationFor(scheme.id, locale);
   if (t?.benefit) return t.benefit;
   if (locale === "kn") return scheme.benefitSummaryKn;
@@ -49,9 +76,22 @@ export function localizedBenefit(scheme: SchemeTextFields, locale: Locale): stri
 }
 
 export function localizedSteps(scheme: SchemeTextFields, locale: Locale): string[] {
+  const directTranslation = locale === "ta"
+    ? scheme.applicationStepsTa
+    : locale === "ml"
+      ? scheme.applicationStepsMl
+      : locale === "te"
+        ? scheme.applicationStepsTe
+        : undefined;
+  if (directTranslation && directTranslation.length > 0) return directTranslation;
+
   const t = translationFor(scheme.id, locale);
   if (t?.steps && t.steps.length > 0) return t.steps;
   if (locale === "kn") return scheme.applicationStepsKn;
   if (locale === "hi") return scheme.applicationStepsHi;
   return scheme.applicationStepsEn;
+}
+
+export function hasLocalizedBenefit(scheme: SchemeTextFields, locale: Locale): boolean {
+  return locale === "en" || localizedBenefit(scheme, locale) !== scheme.benefitSummaryEn;
 }

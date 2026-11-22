@@ -1,79 +1,252 @@
 # JanKalyan AI: Architecture and Workflow
 
 ## 1. What the application does
-JanKalyan AI helps Indian citizens find welfare schemes they may qualify for. A citizen describes themselves in plain language (or fills a form), optionally uploads supporting documents, and the app lists schemes that appear to match, near-misses that need one more action, and schemes that need manual review. It also answers scheme questions in a chat. The current scheme catalogue covers Karnataka plus several other states.
 
-**Important limit:** the app does not verify documents or decide eligibility. Only the government department can sanction a benefit. Every result should be confirmed on the official portal.
+JanKalyan AI helps citizens discover Indian welfare schemes in plain language. A user can:
 
-## 2. High-level architecture
-- Frontend: React 18, TypeScript, Vite 5, react-router-dom 6, Tailwind CSS v4. Located in jankalyan-ai/frontend.
-- Backend: Python FastAPI with Pydantic v2 models. Located in jankalyan-ai/api.
-- External AI and search services: Google Gemini (intake extraction, policy chat, document OCR) and Tavily (live search of official portals).
-- Storage: no database. Scheme catalogue and translations are JSON files in api/data and frontend/src/data. The browser keeps the citizen profile, applications and document records in localStorage.
-- Deployment: the root vercel.json defines two services. Service "api" builds jankalyan-ai/api with the fastapi framework. Service "frontend" builds jankalyan-ai/frontend with the vite framework. Rewrites send /api/* to the api service and everything else to the frontend.
+- Start on a public landing page and continue to scheme discovery.
+- Speak or type a situation in English, Kannada, Hindi, Tamil, Malayalam or Telugu.
+- Select a state and run the scheme-discovery pipeline.
+- View likely matches, near-misses, and schemes needing official eligibility review.
+- Browse the scheme catalogue and open an official scheme portal.
+- Upload an allowed document for Gemini OCR and inspect extracted fields and expiry evidence.
+- Ask a scheme-specific policy question.
+- Mark the bank-passbook requirement ready manually without OCR or bank data storage.
 
-## 3. Backend API routes (api/index.py)
-- GET /api/health: service status and scheme count.
-- GET /api/schemes: returns the scheme catalogue.
-- POST /api/intake: turns free text into a citizen profile. Uses Gemini; falls back to a local heuristic parser if Gemini fails. Response reports extractionMode and defaultedFields.
-- POST /api/orchestrator: takes a profile and optional document evidence and returns matches, near-misses, manual-review schemes and an execution trace.
-- GET /api/tavily-search: live search for official-portal results, optionally tied to a scheme.
-- POST /api/document-ocr: multipart upload (file and category). Extracts fields from a document image or PDF with Gemini.
-- POST /api/chat: answers a scheme question. With a schemeId it uses Gemini; without one it returns a deterministic answer (mode DETERMINISTIC_FALLBACK).
+The app provides guidance only. It does not authenticate documents or guarantee government sanction.
 
-Data models are in api/models.py: the citizen profile (state, district, education level, family income, caste category, land holding, occupation, Aadhaar-bank link flag, and others), the match result, and the trace step.
+## 2. System architecture
 
-## 4. The agentic workflow
-The "agents" are a fixed pipeline of steps, not autonomous agents that decide their own actions. The orchestrator (api/agent/orchestrator.py) runs them in this order and records each one in an execution trace:
+```text
+Browser / React UI
+  |  POST /api/intake
+  |  POST /api/orchestrator
+  |  POST /api/document-ocr
+  |  POST /api/chat
+  |  GET  /api/tavily-search
+  v
+FastAPI service
+  |
+  +-- Intake extractor: heuristics + Gemini
+  +-- Orchestrator: profiling -> vector search -> rule engine -> web search -> checklist
+  +-- Document OCR: Gemini Vision + printed-date validation
+  +-- Policy chat: Gemini with deterministic fallback
+  +-- Live search: Tavily official-domain search
+```
 
-1. ProfilerAgent: normalises the profile and records which fields were defaulted rather than supplied.
-2. VectorSearch: selects candidate schemes for the citizen's state and attributes. Uses a term-frequency cosine similarity over scheme text (api/agent/tools.py).
-3. RuleEngine: evaluates each candidate's rules against the profile. Deterministic, no LLM. Operators: EQUALS, LTE, GTE, IN. Schemes with no rules or with eligibilityMode MANUAL_REVIEW are routed to manual review.
-4. TavilyDetective: a live search of official portals for each candidate (api/agent/tools.py). It adds reference links; it does not change the match result.
-5. DocConcierge: builds the document checklist from the matched schemes and marks which documents are already saved as valid evidence.
+- Frontend: React 18, TypeScript, Vite 5, React Router 6, Tailwind CSS.
+- Backend: Python FastAPI and Pydantic v2.
+- Catalog: JSON data in `jankalyan-ai/api/data/` and frontend copies in `jankalyan-ai/frontend/src/data/`.
+- Browser storage: `localStorage` for profile, document evidence, application tracker data and recent search metadata.
+- Deployment: repository-root `vercel.json` defines internal Vercel services `api` and `frontend`.
 
-Result categories: LIKELY_ELIGIBLE (all rules pass), NEAR_MISS (exactly one rule fails, with a remediation action), and MANUAL_REVIEW.
+## 3. Frontend routes
 
-Document evidence: the OCR module (api/agent/ocr.py) classifies a document into a category, extracts its fields and assigns a validity status. Identity and bank documents are rejected at upload, and the prompts forbid reading Aadhaar or bank numbers. Client-supplied evidence is used to set income; see the limitations below.
+| Route | Page | Responsibility |
+|---|---|---|
+| `/` | `LandingPage.tsx` | Public introduction and entry points |
+| `/discover` | `HomePage.tsx` | Intake, discovery, results and recent searches |
+| `/schemes` | `SchemesCatalogPage.tsx` | State and category filtering |
+| `/schemes/:id` | `SchemeDetailPage.tsx` | Scheme details and official portal |
+| `/documents` | `DocumentsPage.tsx` | Document checklist, manual readiness and OCR |
+| `/tracker` | `TrackerPage.tsx` | Application status placeholders |
+| `/passbook` | `PassbookPage.tsx` | Welfare passbook/export view |
+| `/field-worker` | `FieldWorkerPage.tsx` | Field-worker-oriented sample workflow |
+| `/admin/schemes` | `AdminSchemesPage.tsx` | Local catalogue administration view |
 
-LLM use: Gemini (model gemini-2.5-flash) is used for intake, policy chat and OCR. Eligibility decisions are not made by the LLM.
+The frontend calls the API from `frontend/src/lib/api.ts` using relative `/api/...` URLs. Vercel routes those URLs to the API service; local Vite development proxies `/api` to `http://localhost:8000`.
 
-Failure handling: when Gemini or Tavily fails, the backend returns a fallback result and marks it in the response (for example extractionMode HEURISTIC_FALLBACK, mode DETERMINISTIC_FALLBACK). The browser also has its own fallback path when the backend is unreachable.
+## 4. Agentic discovery flow
 
-## 5. Frontend
-- Routes (frontend/src/App.tsx): / (home and intake), /schemes, /schemes/:id, /documents, /tracker, /passbook, /field-worker, /admin/schemes.
-- State: three React contexts provide the language, the citizen profile and app state (applications and document records). Persistence is in localStorage.
-- Backend calls (frontend/src/lib/api.ts): /api/intake, /api/orchestrator, /api/document-ocr, /api/tavily-search, /api/chat.
-- Offline behaviour: the browser contains a rule evaluator that mirrors the backend's rules for when the backend is unreachable. It is not identical to the backend.
-- Service worker (frontend/public/sw.js): caches the root page, index.html and manifest.json, using a network-first strategy with cache fallback. Scheme data and user records are not cached.
-- Languages: English, Kannada, Hindi, and Tamil, Malayalam and Telugu for scheme text.
+The agentic flow is implemented by `api/agent/orchestrator.py` and `api/agent/tools.py`. It is a deterministic, coordinated pipeline, not a general autonomous agent with unconstrained actions.
 
-## 6. Data
-- api/data/schemes.json: 13 schemes. Each has an id, name, state, department, official portal URL, lastVerifiedDate and eligibility rules. Five Karnataka schemes have rules; eight other-state schemes have none and go to manual review.
-- api/data/scheme_translations_{ml,ta,te}.json: scheme text in Malayalam, Tamil and Telugu.
-- frontend/src/data: a copy of the scheme and translation data used by the catalogue pages.
+```text
+Voice/text or sample
+  -> Intake/profile extraction
+  -> State and profile validation
+  -> State-scoped multilingual embedding retrieval
+  -> Gemini relevance reranking of the shortlist
+  -> Deterministic eligibility evaluation
+  -> Official-portal web search
+  -> Matched-scheme document checklist
+  -> Likely, near-miss, and manual-review output
+```
 
-## 7. Configuration
-Environment variables (names only; values go in .env locally or in Vercel project settings):
-- GEMINI_API_KEY
-- TAVILY_API_KEY
+### Step 1: ProfilerAgent
 
-Backend dependencies are listed in api/requirements.txt: fastapi, uvicorn, pydantic, langchain, langchain-google-genai, tavily-python, python-multipart, google-generativeai, python-dotenv (all with minimum versions, none pinned exactly).
+`POST /api/intake` calls `extract_profile_from_text()` in `api/agent/orchestrator.py`.
 
-## 8. Testing
-Backend unit tests are in api/tests (15 tests) and cover the identity/bank upload block, multilingual intake samples, OCR validity handling and evidence handling. Run them from the project root with PYTHONPATH set to that folder. Frontend: npm run build runs the TypeScript check and the Vite build.
+- Multilingual and English heuristic patterns extract explicit fields.
+- Gemini 2.5 Flash may supplement extraction when `GEMINI_API_KEY` is configured.
+- The model is constrained to a JSON profile shape and only validated enum values are merged.
+- Only explicitly extracted fields are passed to discovery; omitted fields are not treated as known facts by the matching pipeline.
+- The selected state overrides text parsing at the discovery layer.
+- Logs include extraction mode, language and field names, but not the raw transcript or extracted values.
 
-## 9. Known limitations
-- Scheme data has no official government source references for each rule. Only 5 of 13 schemes have rules.
-- The profile does not capture several inputs real schemes need (age, gender, disability, bank account, residence proof).
-- Client-supplied document evidence can set family income without server-side verification.
-- No authentication or rate limiting on the paid endpoints; CORS allows all origins.
-- No consent screen before personal data is sent to Gemini or Tavily.
-- Offline support covers only the app shell, not scheme data or saved records.
-- Some admin and tracker features are placeholders (editing and reminders are disabled).
-- Field Worker queue is sample data kept in the page.
+### Step 2: VectorSearch
 
-## 10. Running locally
-1. Copy jankalyan-ai/.env.example to jankalyan-ai/.env and add your keys.
-2. Backend: from jankalyan-ai, install api/requirements.txt, then run uvicorn api.index:app --port 8000 with PYTHONPATH set to jankalyan-ai.
-3. Frontend: from jankalyan-ai/frontend, run npm install then npm run dev (port 3000, proxies /api to port 8000).
+`run_orchestration_swarm()` calls `search_in_memory_schemes()`:
+
+- `models/gemini-embedding-001` embeds multilingual scheme names, benefits, criteria and rule descriptions.
+- The normalized query uses education, occupation and selected non-sensitive study details; income, caste, disability, name, district and document evidence are excluded.
+- The selected state and All-India schemes are filtered before embedding and ranking.
+- Cosine similarity returns at most 12 candidates with a minimum score of `0.30`; scheme vectors are cached for the lifetime of the API process.
+- The first search in a process creates embeddings for the state-scoped catalog. Later searches reuse cached vectors; a new state's uncached catalog entries are embedded on demand.
+
+### Step 3: GeminiSchemeReranker
+
+- Gemini 2.5 Flash receives the normalized search intent and only the vector shortlist's public scheme fields.
+- It returns an ordered subset of directly relevant candidate IDs. Unknown/malformed IDs or model errors are logged and fail discovery rather than exposing an unfiltered vector list; an empty valid list means Gemini found no relevant candidates.
+- The model ranks topical relevance only. It must not infer legal eligibility or promise benefits.
+- Entrepreneurship, business-loan and women-focused candidates are omitted unless the supplied intent supports them. At most eight manual-review schemes are returned for display.
+- Terminal logs show the exact reranker prompts and raw response. Logs do not include API keys, raw intake text, income/caste/disability values or document contents.
+
+### Step 4: RuleEngine
+
+`evaluate_all_schemes()` in `api/agent/tools.py` applies JSON predicates:
+
+- `EQUALS`
+- `LTE`
+- `GTE`
+- `IN`
+
+Classification:
+
+- `LIKELY_ELIGIBLE`: every applicable rule passes.
+- `NEAR_MISS`: one usable rule fails and a remediation action is generated.
+- `INELIGIBLE`: ineligible with multiple failed rules.
+- `MANUAL_REVIEW`: no automated rules; missing applicant facts or incomplete eligibility conditions prevent a safe automated decision.
+
+Gemini is not used to decide eligibility. Semantic similarity and Gemini reranking are not proof of eligibility.
+
+### Step 5: OfficialWebSearch
+
+`live_tavily_search()` in `api/agent/tools.py` constructs state-specific official-domain queries:
+
+- Andhra Pradesh: `ap.gov.in`, `sspensions.ap.gov.in`, `navasakam.ap.gov.in`, `gsws-nbm.ap.gov.in`, `jnanabhumi.ap.gov.in`, `apagrisnet.gov.in`, `cse.ap.gov.in`, `apcfss.in`, `apmsidc.in` and `apeprocurement.gov.in`
+- Karnataka: `karnataka.gov.in`, `sevasindhuservices.karnataka.gov.in`, `ssp.postmatric.karnataka.gov.in`, `bcwd.karnataka.gov.in`, `sw.karnataka.gov.in`, `fruits.karnataka.gov.in`, `kmdc.karnataka.gov.in`, `fisheries.karnataka.gov.in`, `ashraya.karnataka.gov.in`, `raitamitra.karnataka.gov.in` and `kcdf.karnataka.gov.in`
+- Kerala: `kerala.gov.in`, `egrantz.kerala.gov.in`, `sjd.kerala.gov.in`, `sha.kerala.gov.in`, `ksywb.kerala.gov.in`, `highereducation.kerala.gov.in`, `fisheries.kerala.gov.in`, `lsgkerala.gov.in`, `keralaagriculture.gov.in` and `kudumbashree.org`
+- Tamil Nadu: `tn.gov.in`, `tnsocialwelfare.tn.gov.in`, `tnhealth.tn.gov.in`, `tneaonline.org`, `tndipr.gov.in`, `tnscholarships.gov.in`, `tnstc.in`, `fisheries.tn.gov.in`, `agri.tn.gov.in`, `cmchistn.com` and `ruraldevelopment.tn.gov.in`
+- Telangana: `telangana.gov.in`, `telanganalabour.telangana.gov.in`, `tg.meeseva.telangana.gov.in`, `telanganaepass.cgg.gov.in`, `rythubandhu.telangana.gov.in`, `rythubima.telangana.gov.in`, `aarogyasri.telangana.gov.in`, `agri.telangana.gov.in`, `tsmeeseva.cgg.gov.in`, `wehyb.telangana.gov.in` and `swd.telangana.gov.in`
+- All India: official central domains such as `india.gov.in`, `gov.in`, `pib.gov.in`, `pmindia.gov.in`, `mygov.in`, `digitalindia.gov.in`, `scholarships.gov.in`, `pmkisan.gov.in`, `mofpi.gov.in`, `msme.gov.in` and `skillindia.gov.in`
+
+Tavily is restricted to those domains for a state where a domain map exists. Other states fall back to central government domains. Missing keys or search failures return an explicit unavailable/mock response; the app never fabricates government results. Web results supplement the catalogue and do not change the deterministic match classification.
+
+### Step 6: DocConcierge
+
+The orchestrator aggregates required documents from matched schemes, deduplicates document IDs and records saved OCR evidence. It also applies current income evidence to the profile before final rule evaluation.
+
+Document evidence supplied by the browser is limited to category, validity status, extracted fields and save time. Identity and bank records are excluded from OCR and the bank passbook has only a manual-ready flag.
+
+## 5. Separate AI-assisted flows
+
+### Document OCR flow
+
+`POST /api/document-ocr` in `api/index.py` sends an image or PDF to `api/agent/ocr.py`.
+
+1. MIME type and 10 MB size limits are checked.
+2. Identity and bank categories are rejected.
+3. Gemini 2.5 Flash extracts only generic document type, printed issue date, printed expiry date and annual income.
+4. The prompt forbids Aadhaar numbers, bank account numbers, personal names and unsupported inference.
+5. The backend compares category and printed dates and returns `CURRENT`, `EXPIRED`, `REVIEW_REQUIRED` or `TYPE_MISMATCH`.
+6. The browser saves only extracted fields and validity status in `localStorage`.
+
+OCR indicates printed evidence only; it does not authenticate a document or replace the issuing authority.
+
+### Policy chat flow
+
+`POST /api/chat` calls `answer_policy_query()`:
+
+- If a scheme ID is found and Gemini is configured, Gemini answers with the scheme-specific catalog text.
+- The response is required to remain grounded in the catalog and official portal.
+- If Gemini fails or is not configured, a deterministic, localized scheme answer is used.
+- Sources come from the catalog's official portal metadata.
+
+## 6. Terminal and backend logging
+
+The backend logs:
+
+- Intake extraction mode and normalized provided fields.
+- State-scoped embedding query, candidate IDs and similarity scores.
+- Exact Gemini reranker system/user prompts, raw model response, accepted candidate order and fallback status.
+- Profile field names and saved document evidence summaries, not the underlying values or document text.
+- Eligible and near-miss IDs.
+- State, official domains, search result count and titles.
+- Document checklist and saved evidence IDs.
+- OCR start, final validity and extracted field names, never raw document text or sensitive identifiers.
+
+Set `AGENT_TRACE_VERBOSE=true` in a local backend terminal to additionally print the full profile-extraction prompt/response and scheme text sent to the embedding model. This can include the user's raw description; do not enable verbose tracing in production or shared logs.
+
+## 7. API routes
+
+Routes are defined in `jankalyan-ai/api/index.py`:
+
+- `GET /api/health`
+- `GET /api/schemes`
+- `POST /api/intake`
+- `POST /api/orchestrator`
+- `GET /api/tavily-search`
+- `POST /api/document-ocr`
+- `POST /api/chat`
+
+## 8. Data and state
+
+- `api/data/schemes.json`: 110 current catalog entries, including native-script title fields for Kannada, Hindi, Tamil, Malayalam and Telugu.
+- `api/data/scheme_translations_{ml,ta,te}.json`: supplemental Malayalam, Tamil and Telugu benefit and application-step translations where available.
+- `frontend/src/data/schemes.json`: frontend catalog copy.
+- `frontend/src/context/LanguageContext.tsx`: selected language and dictionaries.
+- `frontend/src/context/CitizenProfileContext.tsx`: citizen profile persistence.
+- `frontend/src/context/AppStateContext.tsx`: matches, document evidence, readiness, application tracker and recent search metadata.
+
+Recent searches store state and scheme IDs, not intake text or document details.
+
+Non-English scheme titles are machine-translated/transliterated for readability; the issuing portal remains the authority for official scheme names. Scheme benefits and application details may still fall back to English when a reviewed translation is unavailable.
+
+The application tracker starts empty. A scheme enters the tracker only after the user completes discovery and confirms that they reviewed the full scheme detail page. The entry starts in `DISCOVERED`; it moves to `DOCS_READY` only when every mandatory document required by that scheme is checked or manually marked ready. Saving, clearing or unchecking document evidence recalculates readiness for already tracked discovered schemes. Applied and later stages are not downgraded automatically.
+
+The profile contract now also carries age, gender, disability percentage, monthly salary, government-employee family status, day-scholar status, college type, AICTE approval, quota and attendance/topper indicators where supplied. Each expanded scheme entry stores structured `eligibilityCriteria` and `sourceUrls`; entries with incomplete statutory details remain manual-review candidates.
+
+## 9. Vercel deployment
+
+The repository-root `vercel.json` configures services:
+
+- `api`: root `jankalyan-ai/api`, FastAPI framework.
+- `frontend`: root `jankalyan-ai/frontend`, Vite framework.
+- `/api/(.*)` is publicly rewritten to `api`.
+- `/(.*)` is publicly rewritten to `frontend`.
+
+No internal service binding is required because the browser calls the API through `/api/*`. Set `GEMINI_API_KEY` and `TAVILY_API_KEY` as Vercel environment variables; do not expose them as frontend `VITE_*` variables.
+
+## 10. Failure and privacy behavior
+
+- Gemini/OCR failure produces a fallback or a clear HTTP error.
+- Gemini embedding or reranker failure returns HTTP 503; the app does not display an unreranked candidate list.
+- Tavily failure never substitutes fabricated search results.
+- The browser also contains a local fallback for some matching when the backend is unreachable.
+- OCR, chat and live search require user-provided API keys/configuration for those services.
+- CORS is currently permissive and there is no authentication or rate limiting.
+- Document evidence and the profile are browser-local; they are not stored in an application database.
+- Identity and bank documents are not accepted for OCR.
+
+## 11. Testing and local development
+
+Backend tests live in `jankalyan-ai/api/tests/` and cover document upload guards, OCR validity, multilingual intake and orchestrator evidence behavior.
+
+```powershell
+cd "jankalyan-ai"
+python -m unittest discover -s api\tests -v
+python -m compileall -q api
+
+cd frontend
+npm run build
+```
+
+Run locally:
+
+```powershell
+cd "jankalyan-ai"
+python -m uvicorn api.index:app --port 8000
+
+cd frontend
+npm run dev
+```
