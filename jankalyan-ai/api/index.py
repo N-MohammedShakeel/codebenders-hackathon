@@ -20,27 +20,50 @@ except ImportError:
     pass
 
 
-from api.models import (
-    CitizenProfile,
-    IntakeRequest,
-    IntakeResponse,
-    OrchestratorRequest,
-    OrchestratorResponse,
-    ChatRequest,
-    ChatResponse,
-    DocumentOCRResponse,
-    TavilySearchResponse
-)
-from api.agent.tools import load_schemes_catalog, live_tavily_search, VectorSearchError
-from api.agent.orchestrator import (
-    extract_profile_from_text,
-    run_orchestration_swarm,
-    answer_policy_query,
-    _find_scheme,
-    _normalize_language,
-    _deterministic_scheme_answer,
-)
-from api.agent.ocr import analyze_document_image, OCRServiceError
+if __package__ == "api":
+    from api.models import (
+        CitizenProfile,
+        IntakeRequest,
+        IntakeResponse,
+        OrchestratorRequest,
+        OrchestratorResponse,
+        ChatRequest,
+        ChatResponse,
+        DocumentOCRResponse,
+        TavilySearchResponse
+    )
+    from api.agent.tools import load_schemes_catalog, live_tavily_search, VectorSearchError
+    from api.agent.orchestrator import (
+        extract_profile_from_text,
+        run_orchestration_swarm,
+        answer_policy_query,
+        _find_scheme,
+        _normalize_language,
+        _deterministic_scheme_answer,
+    )
+    from api.agent.ocr import analyze_document_image, OCRServiceError
+else:
+    from models import (
+        CitizenProfile,
+        IntakeRequest,
+        IntakeResponse,
+        OrchestratorRequest,
+        OrchestratorResponse,
+        ChatRequest,
+        ChatResponse,
+        DocumentOCRResponse,
+        TavilySearchResponse
+    )
+    from agent.tools import load_schemes_catalog, live_tavily_search, VectorSearchError
+    from agent.orchestrator import (
+        extract_profile_from_text,
+        run_orchestration_swarm,
+        answer_policy_query,
+        _find_scheme,
+        _normalize_language,
+        _deterministic_scheme_answer,
+    )
+    from agent.ocr import analyze_document_image, OCRServiceError
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),

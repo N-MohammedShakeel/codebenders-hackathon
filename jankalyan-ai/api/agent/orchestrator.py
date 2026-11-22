@@ -13,16 +13,28 @@ _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
-from api.models import CitizenProfile, AgentExecutionTraceStep
-from api.agent.tools import (
-    load_schemes_catalog,
-    search_in_memory_schemes,
-    evaluate_all_schemes,
-    live_tavily_search,
-    get_official_search_domains,
-    VECTOR_EMBEDDING_MODEL,
-    VectorSearchError,
-)
+if __package__.startswith("api."):
+    from api.models import CitizenProfile, AgentExecutionTraceStep
+    from api.agent.tools import (
+        load_schemes_catalog,
+        search_in_memory_schemes,
+        evaluate_all_schemes,
+        live_tavily_search,
+        get_official_search_domains,
+        VECTOR_EMBEDDING_MODEL,
+        VectorSearchError,
+    )
+else:
+    from models import CitizenProfile, AgentExecutionTraceStep
+    from agent.tools import (
+        load_schemes_catalog,
+        search_in_memory_schemes,
+        evaluate_all_schemes,
+        live_tavily_search,
+        get_official_search_domains,
+        VECTOR_EMBEDDING_MODEL,
+        VectorSearchError,
+    )
 
 _TRANSLATION_CACHE: Dict[str, Dict[str, Any]] = {}
 _MANUAL_REVIEW_SCHEME_LIMIT = 8
