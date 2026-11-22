@@ -376,12 +376,13 @@ The `docs` folder is omitted from this tree.
 
 ## Getting started
 
-Commands below are for Windows (PowerShell or Command Prompt).
+Commands below use Windows PowerShell. Run the backend and frontend in separate terminals.
 
 ### 1. Environment file
 
 ```powershell
-copy jankalyan-ai\.env.example jankalyan-ai\.env
+cd "jankalyan-ai"
+Copy-Item .env.example .env
 ```
 
 Open `jankalyan-ai\.env` and set:
@@ -389,27 +390,26 @@ Open `jankalyan-ai\.env` and set:
 - `GEMINI_API_KEY`
 - `TAVILY_API_KEY`
 
-Never commit `.env` to Git.
+The Gemini key is used for `gemini-3.6-flash` generation and OCR, and `models/gemini-embedding-001` for semantic search. Never commit `.env` to Git.
 
-### 2. Backend
+### 2. Backend (Terminal 1)
 
-From the `jankalyan-ai` folder:
+From the repository root:
 
 ```powershell
-cd jankalyan-ai
+cd "jankalyan-ai"
 pip install -r api\requirements.txt
-set PYTHONPATH=%CD%
-uvicorn api.index:app --port 8000
+python -m uvicorn api.index:app --reload --port 8000
 ```
 
-In PowerShell, use `$env:PYTHONPATH = (Get-Location).Path` instead of `set PYTHONPATH=%CD%`.
+The backend runs at `http://localhost:8000`. Keep this terminal running.
 
-### 3. Frontend
+### 3. Frontend (Terminal 2)
 
-From the `jankalyan-ai\frontend` folder, in a second terminal:
+Open a second terminal at the repository root:
 
 ```powershell
-cd jankalyan-ai\frontend
+cd "jankalyan-ai\frontend"
 npm install
 npm run dev
 ```
@@ -420,14 +420,13 @@ The dev server runs on port 3000 and proxies `/api` to port 8000.
 
 - Marketing landing page: http://localhost:3000/
 - Application / scheme discovery: http://localhost:3000/discover
-- Scheme discovery: http://localhost:3000/discover
 - Scheme catalogue: http://localhost:3000/schemes
 
 ---
 
 ## Testing
 
-**Backend.** From the `jankalyan-ai` folder, set `PYTHONPATH` to the `jankalyan-ai` folder as in step 2, then run:
+**Backend.** From the `jankalyan-ai` folder:
 
 ```powershell
 python -m unittest discover -s api\tests -v

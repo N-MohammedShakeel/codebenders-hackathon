@@ -3,7 +3,12 @@
   "services": {
     "api": {
       "root": "jankalyan-ai/api",
-      "framework": "fastapi"
+      "framework": "fastapi",
+      "functions": {
+        "index.py": {
+          "maxDuration": 60
+        }
+      }
     },
     "frontend": {
       "root": "jankalyan-ai/frontend",
