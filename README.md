@@ -50,7 +50,7 @@ flowchart LR
     end
 
     subgraph Backend_services["Backend services"]
-        GEM["Gemini<br/>gemini-2.5-flash"]
+        GEM["Gemini<br/>gemini-3.6-flash"]
         TAV["Tavily<br/>official-portal search"]
         JSON[("JSON data files<br/>scheme catalogue")]
     end
@@ -91,7 +91,7 @@ The pipeline runs in this order:
 
 1. **ProfilerAgent** builds the citizen profile from the intake data.
 2. **VectorSearch** embeds the search intent and eligible state/All-India scheme text with Gemini embeddings, then ranks by cosine similarity.
-   - **GeminiReranker** uses `gemini-2.5-flash` to select and order relevant candidates. Discovery fails closed if embedding or reranking fails.
+   - **GeminiReranker** uses `gemini-3.6-flash` to select and order relevant candidates. Discovery fails closed if embedding or reranking fails.
 3. **RuleEngine** applies deterministic rules. The operators are `EQUALS`, `LTE`, `GTE` and `IN`. Entries marked `MANUAL_REVIEW` are returned separately rather than treated as automated eligibility matches.
 4. **TavilyDetective** checks configured official portals and records search metadata in the execution trace. It does not change match status or add search-result cards to discovery.
 5. **DocConcierge** builds the document checklist for each scheme.
@@ -128,7 +128,7 @@ sequenceDiagram
 
 ### Where the LLM is used
 
-Gemini services are used for intake profile extraction, multilingual embeddings (`models/gemini-embedding-001`), candidate relevance ranking, policy chat and document OCR (generative calls use `gemini-2.5-flash`). Eligibility pass/fail is decided by deterministic rules where available, not by Gemini.
+Gemini services are used for intake profile extraction, multilingual embeddings (`models/gemini-embedding-001`), candidate relevance ranking, policy chat and document OCR (generative calls use `gemini-3.6-flash`). Eligibility pass/fail is decided by deterministic rules where available, not by Gemini.
 
 ### Fallbacks
 

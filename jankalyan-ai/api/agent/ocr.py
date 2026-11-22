@@ -11,13 +11,15 @@ import re
 from typing import Any, Dict, Optional
 
 if __package__.startswith("api."):
+    from api.agent.gemini_config import GEMINI_GENERATIVE_MODEL
     from api.agent.gemini_errors import gemini_failure_message
 else:
+    from agent.gemini_config import GEMINI_GENERATIVE_MODEL
     from agent.gemini_errors import gemini_failure_message
 
 logger = logging.getLogger(__name__)
 
-_MODEL_NAME = "gemini-2.5-flash"
+_MODEL_NAME = GEMINI_GENERATIVE_MODEL
 _CATEGORIES = {
     "identity",
     "income",

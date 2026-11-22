@@ -15,6 +15,7 @@ if _PROJECT_ROOT not in sys.path:
 
 if __package__.startswith("api."):
     from api.models import CitizenProfile, AgentExecutionTraceStep
+    from api.agent.gemini_config import GEMINI_GENERATIVE_MODEL
     from api.agent.gemini_errors import gemini_failure_message
     from api.agent.tools import (
         load_schemes_catalog,
@@ -27,6 +28,7 @@ if __package__.startswith("api."):
     )
 else:
     from models import CitizenProfile, AgentExecutionTraceStep
+    from agent.gemini_config import GEMINI_GENERATIVE_MODEL
     from agent.gemini_errors import gemini_failure_message
     from agent.tools import (
         load_schemes_catalog,
@@ -339,11 +341,12 @@ def extract_profile_from_text(text: str, language: str = "en") -> Tuple[CitizenP
         try:
             from langchain_google_genai import ChatGoogleGenerativeAI
             logger.info(
-                "GeminiProfileExtractor request: model=gemini-2.5-flash language=%s input_character_count=%d",
+                "GeminiProfileExtractor request: model=%s language=%s input_character_count=%d",
+                GEMINI_GENERATIVE_MODEL,
                 language_code,
                 len(text),
             )
-            llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=api_key, temperature=0.1)
+            llm = ChatGoogleGenerativeAI(model=GEMINI_GENERATIVE_MODEL, google_api_key=api_key, temperature=0.1)
             prompt = f"""The user's text is in {_INTAKE_LANGUAGE_NAMES[language_code]} (language code: {language_code}). Extract only facts explicitly stated by the user. Return a JSON object with keys: name, state, district, educationLevel (CLASS_8_10, PUC, DIPLOMA, GRADUATE, NONE), familyAnnualIncome (number in INR), casteCategory (GENERAL, OBC, SC, ST), landHoldingAcres (number), occupation (STUDENT, FARMER, UNEMPLOYED), age (number), gender (MALE, FEMALE, OTHER), disabilityPercentage (number), monthlySalaryINR (number), hasGovernmentEmployeeInFamily (boolean), dayScholar (boolean), collegeType (GOVERNMENT, PRIVATE, AIDED, DEEMED), aicteApproved (boolean), quota (GENERAL, SC, ST, OBC, EWS, MINORITY), attendancePercentage (number), academicTopper (boolean). Use only those enum values, and do not infer missing facts.
 Text: "{text}"
 JSON:"""
@@ -415,7 +418,7 @@ def _get_gemini_chat_model(api_key: str):
     from langchain_google_genai import ChatGoogleGenerativeAI
 
     return ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
+        model=GEMINI_GENERATIVE_MODEL,
         google_api_key=api_key,
         temperature=0.1,
     )
@@ -469,7 +472,8 @@ def _rank_candidates_with_gemini(
         separators=(",", ":"),
     )
     logger.info(
-        "GeminiSchemeReranker request: model=gemini-2.5-flash system_prompt=%s user_prompt=%s",
+        "GeminiSchemeReranker request: model=%s system_prompt=%s user_prompt=%s",
+        GEMINI_GENERATIVE_MODEL,
         system_prompt,
         user_prompt,
     )
@@ -617,7 +621,7 @@ def run_orchestration_swarm(
         agentRole="GeminiSchemeReranker",
         action="Reranked semantic candidates by relevance; did not decide eligibility",
         input={
-            "model": "gemini-2.5-flash",
+            "model": GEMINI_GENERATIVE_MODEL,
             "candidateIds": vector_candidate_ids,
             "profileFieldsSent": sorted(search_intent.keys()),
         },
@@ -834,7 +838,7 @@ def _gemini_policy_answer(question: str, scheme: Dict[str, Any], language: str, 
         "5. Never ask for, repeat, or store an Aadhaar number.\n"
         "Keep the answer short and plain."
     )
-    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=api_key, temperature=0.1)
+    llm = ChatGoogleGenerativeAI(model=GEMINI_GENERATIVE_MODEL, google_api_key=api_key, temperature=0.1)
     res = llm.invoke([
         SystemMessage(content=system_prompt),
         HumanMessage(content=f"Scheme information:\n{_scheme_context(scheme)}\n\nCitizen question: {question}"),

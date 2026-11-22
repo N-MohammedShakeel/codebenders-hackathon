@@ -79,7 +79,7 @@ Voice/text or sample
 `POST /api/intake` calls `extract_profile_from_text()` in `api/agent/orchestrator.py`.
 
 - Multilingual and English heuristic patterns extract explicit fields.
-- Gemini 2.5 Flash may supplement extraction when `GEMINI_API_KEY` is configured.
+- Gemini 3.6 Flash may supplement extraction when `GEMINI_API_KEY` is configured.
 - The model is constrained to a JSON profile shape and only validated enum values are merged.
 - Only explicitly extracted fields are passed to discovery; omitted fields are not treated as known facts by the matching pipeline.
 - The selected state overrides text parsing at the discovery layer.
@@ -97,7 +97,7 @@ Voice/text or sample
 
 ### Step 3: GeminiSchemeReranker
 
-- Gemini 2.5 Flash receives the normalized search intent and only the vector shortlist's public scheme fields.
+- Gemini 3.6 Flash receives the normalized search intent and only the vector shortlist's public scheme fields.
 - It returns an ordered subset of directly relevant candidate IDs. Unknown/malformed IDs or model errors are logged and fail discovery rather than exposing an unfiltered vector list; an empty valid list means Gemini found no relevant candidates.
 - The model ranks topical relevance only. It must not infer legal eligibility or promise benefits.
 - Entrepreneurship, business-loan and women-focused candidates are omitted unless the supplied intent supports them. At most eight manual-review schemes are returned for display.
@@ -148,7 +148,7 @@ Document evidence supplied by the browser is limited to category, validity statu
 
 1. MIME type and 10 MB size limits are checked.
 2. Identity and bank categories are rejected.
-3. Gemini 2.5 Flash extracts only generic document type, printed issue date, printed expiry date and annual income.
+3. Gemini 3.6 Flash extracts only generic document type, printed issue date, printed expiry date and annual income.
 4. The prompt forbids Aadhaar numbers, bank account numbers, personal names and unsupported inference.
 5. The backend compares category and printed dates and returns `CURRENT`, `EXPIRED`, `REVIEW_REQUIRED` or `TYPE_MISMATCH`.
 6. The browser saves only extracted fields and validity status in `localStorage`; the uploaded image itself is not added to browser storage.
