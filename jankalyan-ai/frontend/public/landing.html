@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Describe yourself in plain language and get a list of welfare schemes that may match, with the official portal to confirm each one." />
+  <title>JanKalyan AI – Find the welfare schemes you qualify for</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #1a1a2e;
+      background: #ffffff;
+    }
+    a { color: #0b4a8b; }
+    a:hover { color: #083866; }
+    a:focus-visible, .btn:focus-visible {
+      outline: 3px solid #0b3d91;
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 1.25rem; }
+
+    header.site-header {
+      background: #0b3d91;
+      color: #ffffff;
+    }
+    .site-header .wrap {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding-top: 0.9rem;
+      padding-bottom: 0.9rem;
+    }
+    .brand { font-size: 1.25rem; font-weight: 700; color: #ffffff; text-decoration: none; }
+    .site-header nav { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .site-header nav a { color: #ffffff; text-decoration: underline; text-underline-offset: 3px; }
+    .site-header nav a:hover { color: #dbe7f7; }
+    .site-header a:focus-visible { outline-color: #ffffff; }
+
+    .hero {
+      background: #eef4fb;
+      padding: 4rem 0 3.5rem;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+      line-height: 1.2;
+      margin: 0 0 1rem;
+      color: #0b2a55;
+    }
+    .hero p {
+      font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+      max-width: 40rem;
+      margin: 0 auto 2rem;
+      color: #1a1a2e;
+    }
+    .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.4rem;
+      border-radius: 6px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 2px solid #0b3d91;
+    }
+    .btn-primary { background: #0b3d91; color: #ffffff; }
+    .btn-primary:hover { background: #082d6b; color: #ffffff; }
+    .btn-secondary { background: #ffffff; color: #0b3d91; }
+    .btn-secondary:hover { background: #dbe7f7; color: #082d6b; }
+
+    section.block { padding: 3.5rem 0; }
+    section.block h2 {
+      font-size: 1.6rem;
+      margin: 0 0 1.5rem;
+      color: #0b2a55;
+    }
+    .cards {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 1.25rem;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #c9d6e8;
+      border-radius: 8px;
+      padding: 1.25rem 1.25rem 1.4rem;
+    }
+    .card .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 50%;
+      background: #0b3d91;
+      color: #ffffff;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+    .card h3 { font-size: 1.1rem; margin: 0 0 0.5rem; color: #0b2a55; }
+    .card p { margin: 0; color: #1a1a2e; }
+
+    section.good { background: #f4f6f8; }
+    .good ul { margin: 0; padding-left: 1.25rem; }
+    .good li { margin-bottom: 0.6rem; }
+
+    footer.site-footer {
+      background: #1a1a2e;
+      color: #ffffff;
+      padding: 1.5rem 0;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+    footer.site-footer p { margin: 0; }
+
+    @media (max-width: 520px) {
+      .hero { padding: 2.5rem 0 2.25rem; }
+      .actions .btn { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="/">JanKalyan AI</a>
+      <nav aria-label="Main">
+        <a href="/">Open the app</a>
+        <a href="/schemes">Browse schemes</a>
+        <a href="#how">How it works</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap">
+        <h1 id="hero-title">Find the welfare schemes you qualify for</h1>
+        <p>Describe yourself in plain language. Get a list of schemes that may match, with the official portal to confirm each one.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="/">Open the app</a>
+          <a class="btn btn-secondary" href="/schemes">Browse schemes</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="how" aria-labelledby="how-title">
+      <div class="wrap">
+        <h2 id="how-title">How it works</h2>
+        <ol class="cards">
+          <li class="card">
+            <span class="num" aria-hidden="true">1</span>
+            <h3>Tell us about yourself</h3>
+            <p>Type or speak in English, Kannada or Hindi.</p>
+          </li>
+          <li class="card">
+            <span class="num" aria-hidden="true">2</span>
+            <h3>We check the scheme rules</h3>
+            <p>Rules run locally on the scheme catalogue. An AI model reads your description.</p>
+          </li>
+          <li class="card">
+            <span class="num" aria-hidden="true">3</span>
+            <h3>Confirm on the official portal</h3>
+            <p>Every result links to the government site.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="block good" aria-labelledby="good-title">
+      <div class="wrap">
+        <h2 id="good-title">Good to know</h2>
+        <ul>
+          <li>The app does not verify documents or decide eligibility.</li>
+          <li>Only the department can sanction a benefit.</li>
+          <li>Identity and bank documents are not accepted for upload.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>JanKalyan AI – a hackathon prototype. Always confirm details on the official portal.</p>
+    </div>
+  </footer>
+</body>
+</html>

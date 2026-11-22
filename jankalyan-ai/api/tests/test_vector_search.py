@@ -179,6 +179,27 @@ class VectorSearchTests(unittest.TestCase):
         self.assertEqual(status, "RERANKER_INVALID_RESPONSE")
         self.assertEqual(ranked, [])
 
+    def test_gemini_quota_error_is_reported_for_discovery(self):
+        candidates = [{"id": "tn-one"}]
+        model = FakeChatModel("")
+
+        def fail_invoke(_messages):
+            raise RuntimeError("429 ResourceExhausted: quota exceeded")
+
+        model.invoke = fail_invoke
+        with (
+            patch.dict("os.environ", {"GEMINI_API_KEY": "test-key"}),
+            patch.object(orchestrator, "_get_gemini_chat_model", return_value=model),
+        ):
+            with self.assertRaises(tools.VectorSearchError) as raised:
+                orchestrator._rank_candidates_with_gemini(
+                    {"educationLevel": "GRADUATE"},
+                    candidates,
+                )
+
+        self.assertIn("quota", str(raised.exception).lower())
+        self.assertIn("billing", str(raised.exception).lower())
+
     def test_orchestrator_fails_closed_when_gemini_reranking_fails(self):
         candidates = [{"id": "tn-job", "state": "Tamil Nadu", "eligibilityMode": "MANUAL_REVIEW"}]
         with (

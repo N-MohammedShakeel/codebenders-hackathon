@@ -2,8 +2,9 @@ import datetime
 import os
 import unittest
 from unittest.mock import patch
+from google.api_core.exceptions import ResourceExhausted
 
-from api.agent.ocr import analyze_document_image
+from api.agent.ocr import analyze_document_image, OCRServiceError, _provider_error_message
 
 
 class DocumentOCRAssessmentTests(unittest.TestCase):
@@ -54,6 +55,12 @@ class DocumentOCRAssessmentTests(unittest.TestCase):
 
         self.assertIsNone(result["extracted"]["documentType"])
         self.assertEqual(result["fileName"], "document")
+
+    def test_resource_exhausted_returns_quota_guidance(self):
+        message = _provider_error_message(ResourceExhausted("429 quota exceeded"))
+
+        self.assertIn("quota", message.lower())
+        self.assertIn("billing", message.lower())
 
 
 if __name__ == "__main__":

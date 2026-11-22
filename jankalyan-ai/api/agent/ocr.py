@@ -10,6 +10,11 @@ import os
 import re
 from typing import Any, Dict, Optional
 
+if __package__.startswith("api."):
+    from api.agent.gemini_errors import gemini_failure_message
+else:
+    from agent.gemini_errors import gemini_failure_message
+
 logger = logging.getLogger(__name__)
 
 _MODEL_NAME = "gemini-2.5-flash"
@@ -56,6 +61,10 @@ _DOCUMENT_TYPE_LABELS = {
 
 class OCRServiceError(RuntimeError):
     """Raised when Gemini cannot return a usable OCR result."""
+
+
+def _provider_error_message(exc: Exception) -> str:
+    return gemini_failure_message(exc, "document OCR")
 
 
 def _strip_fences(text: str) -> str:
@@ -105,7 +114,12 @@ def _call_vision_ai(file_bytes: bytes, mime_type: str, api_key: str, category: s
         text = getattr(response, "text", None)
     except Exception as exc:
         logger.exception("Gemini document OCR request failed")
-        raise OCRServiceError("Gemini could not process the uploaded document.") from exc
+        logger.error(
+            "Gemini document OCR provider error: type=%s status=%s",
+            type(exc).__name__,
+            getattr(getattr(exc, "code", None), "value", getattr(exc, "code", None)),
+        )
+        raise OCRServiceError(_provider_error_message(exc)) from exc
 
     if not isinstance(text, str):
         raise OCRServiceError("Gemini returned no readable document details.")

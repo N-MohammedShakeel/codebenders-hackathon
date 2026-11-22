@@ -15,6 +15,7 @@ if _PROJECT_ROOT not in sys.path:
 
 if __package__.startswith("api."):
     from api.models import CitizenProfile, AgentExecutionTraceStep
+    from api.agent.gemini_errors import gemini_failure_message
     from api.agent.tools import (
         load_schemes_catalog,
         search_in_memory_schemes,
@@ -26,6 +27,7 @@ if __package__.startswith("api."):
     )
 else:
     from models import CitizenProfile, AgentExecutionTraceStep
+    from agent.gemini_errors import gemini_failure_message
     from agent.tools import (
         load_schemes_catalog,
         search_in_memory_schemes,
@@ -480,11 +482,13 @@ def _rank_candidates_with_gemini(
             HumanMessage(content=user_prompt),
         ])
     except Exception as exc:
+        message = gemini_failure_message(exc, "scheme relevance ranking")
         logger.error(
-            "Gemini scheme reranking failed (%s); no unreranked candidates will be displayed.",
+            "Gemini scheme reranking failed: error_type=%s message=%s; no unreranked candidates will be displayed.",
             type(exc).__name__,
+            message,
         )
-        return ([], "RERANKER_ERROR")
+        raise VectorSearchError(message) from exc
 
     response_text = _llm_content_text(response).strip()
     logger.info("GeminiSchemeReranker response: raw_response=%s", response_text)
@@ -574,7 +578,11 @@ def run_orchestration_swarm(
     ranked_candidates, gemini_status = _rank_candidates_with_gemini(profile_dict, vector_candidates)
     gemini_rank_duration = _elapsed_ms(gemini_rank_duration_start)
     if gemini_status not in {"RERANKED", "NO_RELEVANT_CANDIDATES", "NO_CANDIDATES"}:
-        raise VectorSearchError("Gemini relevance ranking could not be completed.")
+        if gemini_status == "NOT_CONFIGURED":
+            raise VectorSearchError("Gemini relevance ranking is not configured. Set GEMINI_API_KEY in Vercel.")
+        if gemini_status == "RERANKER_INVALID_RESPONSE":
+            raise VectorSearchError("Gemini returned an unreadable relevance-ranking response. Please retry.")
+        raise VectorSearchError("Gemini relevance ranking could not be completed. Check the Vercel function logs.")
     manual_review_candidate_ids = [
         str(scheme.get("id", ""))
         for scheme in ranked_candidates
